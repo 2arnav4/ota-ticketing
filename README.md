@@ -88,7 +88,7 @@ More requests (validation, 403 for fans checking in, sold-out and past events) a
 - **Rate limit:** 30 bookings / check-ins per minute per client. The race above stays under it.
 - **Camera:** works in phone browsers because the site is HTTPS. On a laptop, type the code instead.
 - **Identity is a demo header, not security.** Anyone can act as any demo user, including Gate Staff; real login
-  would replace it (see Known gaps).
+  would replace it.
 - **Run it yourself:** everything also runs locally (next section).
 
 ## Run it locally
@@ -191,45 +191,6 @@ on a 2-left event → exactly 2 succeed; 5 parallel scans of one code → exactl
   Input is validated with zod only at the boundary; bodies are strict (unknown fields → 400).
 - **Event data:** the two "Ōta TOKYO Delhi" events use the real listing's dates, venue and ₹349 price. All
   other events are invented demo data.
-
-## Known gaps (deliberate, given the brief)
-
-- `X-User-Id` is **not authentication**: anyone can send any seeded user's ID, including staff's. Real auth
-  (sessions or JWT) would replace the header; the role check on `/checkins` is already server-side.
-- The write rate limit (30/min per IP) is in memory, so on Vercel it is per function instance. A global limit
-  belongs in Vercel Firewall or a shared store.
-- The free Aiven database can be powered off when idle; the first request after that may fail until it's back.
-
-## Deploy (owner notes)
-
-Live setup: API on Vercel (Express, region `sin1` Singapore), web app on Vercel (static Expo web export), MySQL 8.4
-on Aiven's free tier (also Singapore, so each query is a short hop).
-
-**Every push to `main` deploys both projects automatically** (Vercel's GitHub integration; project root folders
-`api/` and `app/`). Other branches don't deploy: `git.deploymentEnabled` in each `vercel.json` allows `main` only.
-Database migrations are never part of a deploy; run step 2 by hand first when a change adds one.
-
-1. **Database (Aiven, free MySQL):** create the service; copy its Service URI and download its CA certificate
-   (`ca.pem`) from the service's Overview page.
-2. **Migrate from a Linux container.** Aiven's server certificate has no `serverAuth` extended key usage, which
-   macOS's TLS verifier requires, so `prisma migrate deploy` on a Mac fails with P1011 even though the chain is
-   valid. Inside Docker, OpenSSL verifies it normally (TLS stays verified; never use `sslaccept=accept_invalid_certs`):
-   ```bash
-   cd api
-   docker run --rm -v "$PWD/prisma:/src/prisma:ro" -v "$PWD/prisma.config.ts:/src/prisma.config.ts:ro" \
-     -v /absolute/path/ca.pem:/ca.pem:ro \
-     -e DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb?sslaccept=strict&sslcert=/ca.pem' \
-     node:24-bookworm-slim sh -c 'mkdir /work && cp -r /src/prisma /src/prisma.config.ts /work/ && cd /work && \
-       npm init -y >/dev/null && npm i --silent prisma@7.10.1 dotenv@18.0.9 && npx prisma migrate deploy'
-   ```
-3. **Seed** (Node verifies the certificate fine on macOS):
-   `DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb' DATABASE_SSL=true DATABASE_CA_CERT="$(cat ca.pem)" npm run db:seed`
-4. **API on Vercel** (project root `api/`, deploys on push to `main`). `api/vercel.json` sets the Express framework,
-   the `sin1` region and the daily reset cron. Env: `DATABASE_URL` (no query string), `DATABASE_SSL=true`,
-   `DATABASE_CA_CERT` (the PEM), `CORS_ORIGINS` (the web app URL), `CRON_SECRET` (random, 16+ chars),
-   `LOG_LEVEL=info`, `RATE_LIMIT_PER_MINUTE=30`.
-5. **Web app on Vercel** (project root `app/`, deploys on push to `main`), env `EXPO_PUBLIC_API_URL` = the API URL.
-6. Check `https://<api>/health` returns `{"status":"ok","db":"up"}`.
 
 ## Tests
 
