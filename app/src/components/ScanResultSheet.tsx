@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ApiError, NetworkError } from "@/api/client";
+import { classifyError, logForDevelopers } from "@/utils/errorKind";
 import type { CheckedInTicket } from "@/api/types";
 import { colors, layout, radius, space, type } from "@/theme/tokens";
 import { formatDateAndTime, formatTicketCode } from "@/utils/format";
@@ -18,17 +18,19 @@ function describe({ ticket, error }: Pick<Props, "ticket" | "error">, t: TFuncti
       lines: [ticket.holderName, ticket.event.name, formatTicketCode(ticket.code)],
     };
   }
-  if (error instanceof ApiError) {
-    if (error.code === "ALREADY_CHECKED_IN") {
-      const at = typeof error.details.checkedInAt === "string" ? formatDateAndTime(error.details.checkedInAt, language) : "";
+  logForDevelopers(error);
+  const result = classifyError(error);
+  if (result.kind === "network") return { tone: "danger", title: t("scan.result.offline"), lines: [t("errors.network")] };
+  if (result.kind === "server") return { tone: "danger", title: t("scan.result.failed"), lines: [t("errors.server")] };
+  if (result.kind === "known") {
+    if (result.code === "ALREADY_CHECKED_IN") {
+      const at = typeof result.details.checkedInAt === "string" ? formatDateAndTime(result.details.checkedInAt, language) : "";
       return { tone: "warning", title: t("scan.result.already"), lines: [t("scan.result.alreadyAt", { when: at }), t("scan.result.doNotAdmit")] };
     }
-    if (error.code === "TICKET_NOT_FOUND") return { tone: "danger", title: t("scan.result.unknown"), lines: [t("scan.result.unknownLine")] };
-    if (error.code === "VALIDATION_FAILED") return { tone: "danger", title: t("scan.result.invalid"), lines: [t("scan.result.invalidLine")] };
-    if (error.code === "FORBIDDEN") return { tone: "danger", title: t("scan.result.staffOnly"), lines: [t("scan.result.staffOnlyLine")] };
-    return { tone: "danger", title: t("scan.result.failed"), lines: [error.message] };
+    if (result.code === "TICKET_NOT_FOUND") return { tone: "danger", title: t("scan.result.unknown"), lines: [t("scan.result.unknownLine")] };
+    if (result.code === "VALIDATION_FAILED") return { tone: "danger", title: t("scan.result.invalid"), lines: [t("scan.result.invalidLine")] };
+    if (result.code === "FORBIDDEN") return { tone: "danger", title: t("scan.result.staffOnly"), lines: [t("scan.result.staffOnlyLine")] };
   }
-  if (error instanceof NetworkError) return { tone: "danger", title: t("scan.result.offline"), lines: [t("errors.network", { url: error.url })] };
   return { tone: "danger", title: t("scan.result.failed"), lines: [t("scan.result.tryAgain")] };
 }
 

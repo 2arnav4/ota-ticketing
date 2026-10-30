@@ -3,10 +3,10 @@ import { useTranslation } from "react-i18next";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ApiError, NetworkError } from "@/api/client";
 import type { EventSummary } from "@/api/types";
 import { useBook } from "@/hooks/useBook";
 import { colors, space, type } from "@/theme/tokens";
+import { classifyError, logForDevelopers } from "@/utils/errorKind";
 import { formatINR } from "@/utils/format";
 import { GradientButton } from "./GradientButton";
 import { QuantityStepper } from "./QuantityStepper";
@@ -15,14 +15,16 @@ const MAX_PER_BOOKING = 4;
 
 // Branches on the API's error code, never its English message, so every case is translatable.
 function bookingErrorMessage(error: unknown, t: TFunction): string {
-  if (error instanceof ApiError) {
-    if (error.code === "NOT_ENOUGH_LEFT") return t("booking.notEnough", { count: Number(error.details.ticketsLeft) });
-    if (error.code === "SOLD_OUT") return t("booking.soldOut");
-    if (error.code === "EVENT_STARTED") return t("booking.started");
-    if (error.code === "RATE_LIMITED") return t("booking.rateLimited");
-    return error.message;
+  logForDevelopers(error);
+  const result = classifyError(error);
+  if (result.kind === "network") return t("errors.network");
+  if (result.kind === "server") return t("errors.server");
+  if (result.kind === "known") {
+    if (result.code === "NOT_ENOUGH_LEFT") return t("booking.notEnough", { count: Number(result.details.ticketsLeft) });
+    if (result.code === "SOLD_OUT") return t("booking.soldOut");
+    if (result.code === "EVENT_STARTED") return t("booking.started");
+    if (result.code === "RATE_LIMITED") return t("booking.rateLimited");
   }
-  if (error instanceof NetworkError) return t("errors.network", { url: error.url });
   return t("booking.failed");
 }
 
@@ -36,7 +38,14 @@ export function BookingPanel({ event }: { event: EventSummary }) {
   const quantity = Math.max(1, Math.min(requested, max));
 
   if (event.ticketsLeft === 0) {
-    return <GradientButton label={t("events.soldOut")} onPress={() => undefined} disabled />;
+    // Lost a race: the 409 refetch flips the card to sold out. Keep the reason visible, or the user's tap
+    // seems to have done nothing.
+    return (
+      <View style={styles.panel}>
+        {book.isError ? <Text style={styles.error}>{bookingErrorMessage(book.error, t)}</Text> : null}
+        <GradientButton label={t("events.soldOut")} onPress={() => undefined} disabled />
+      </View>
+    );
   }
 
   const onBook = () => {

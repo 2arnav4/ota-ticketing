@@ -69,10 +69,11 @@
   },
   "errors": {
     "title": "Couldn't load this",
-    "network": "Can't reach the server ({{url}})",
+    "network": "Can't connect right now. Check your internet connection and try again.",
     "generic": "Something went wrong.",
     "retry": "Retry",
-    "loading": "Loading"
+    "loading": "Loading",
+    "server": "Something went wrong on our side. Please try again in a moment."
   },
   "banner": {
     "dismiss": "Dismiss"

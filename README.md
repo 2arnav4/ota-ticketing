@@ -160,6 +160,5 @@ cd api && npm run race    # 20 simultaneous bookings on the 2-left event: exactl
 cd api && npm run dev:logs   # API with readable logs: one line per booking, check-in and rejection
 ```
 
-- `TEST_PLAN.md`: the full manual test plan (phone, desktop and phone browsers, race conditions, two devices
-  on one account, curl checks).
+- `TEST_PLAN.md`: a 14-point feature checklist and a one-minute race-condition test.
 - `GAUNTLET.md`: concurrency, load and security test results.

@@ -1,13 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ApiError, NetworkError } from "@/api/client";
+import { classifyError, logForDevelopers } from "@/utils/errorKind";
 import { colors, radius, space, type } from "@/theme/tokens";
 
 function useDescribe(): (error: unknown) => string {
   const { t } = useTranslation();
   return (error) => {
-    if (error instanceof NetworkError) return t("errors.network", { url: error.url });
-    if (error instanceof ApiError) return error.message;
+    logForDevelopers(error);
+    const { kind } = classifyError(error);
+    if (kind === "network") return t("errors.network");
+    if (kind === "server") return t("errors.server");
     return t("errors.generic");
   };
 }
