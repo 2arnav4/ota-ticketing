@@ -11,10 +11,10 @@ export function formatINR(paise: number): string {
 const IST = "Asia/Kolkata";
 
 const FORMATS = {
-  dateTime: { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" },
+  dateTime: { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true },
   day: { day: "numeric" },
   month: { month: "short" },
-  time: { hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
+  time: { hour: "numeric", minute: "2-digit", hour12: true },
   date: { day: "numeric", month: "short", year: "numeric" },
 } satisfies Record<string, Intl.DateTimeFormatOptions>;
 
@@ -36,8 +36,18 @@ function formatter(name: FormatName, language: string): Intl.DateTimeFormat {
   return cached;
 }
 
+// 12-hour clock everywhere. en-IN writes "7:42 pm"; English UI shows "7:42 PM", Japanese keeps "午後7:42".
+function format12h(name: "dateTime" | "time", iso: string, language: string): string {
+  return formatter(name, language)
+    .formatToParts(new Date(iso))
+    .map((part) => (part.type === "dayPeriod" && language !== "ja" ? part.value.toUpperCase() : part.value))
+    .join("")
+    // ICU puts a narrow no-break space (U+202F) before AM/PM; some Android fonts draw it as a box.
+    .replace(/\u202f/g, " ");
+}
+
 export function formatEventDateTime(iso: string, language: string): string {
-  return formatter("dateTime", language).format(new Date(iso));
+  return format12h("dateTime", iso, language);
 }
 
 export function formatDateChip(iso: string, language: string): { day: string; month: string } {
@@ -45,12 +55,12 @@ export function formatDateChip(iso: string, language: string): { day: string; mo
   return { day: formatter("day", language).format(date).replace(/日$/, ""), month: formatter("month", language).format(date).toUpperCase() };
 }
 
-/** "18:42" in IST, for check-in badges. */
+/** "6:42 PM" in IST (午後6:42 in Japanese), for check-in badges. */
 export function formatTime(iso: string, language: string): string {
-  return formatter("time", language).format(new Date(iso));
+  return format12h("time", iso, language);
 }
 
-/** "15 Aug 2026 · 18:42" in IST. */
+/** "15 Aug 2026 · 6:42 PM" in IST. */
 export function formatDateAndTime(iso: string, language: string): string {
   return `${formatter("date", language).format(new Date(iso))} · ${formatTime(iso, language)}`;
 }
