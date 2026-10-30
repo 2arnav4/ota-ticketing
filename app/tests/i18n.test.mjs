@@ -24,8 +24,17 @@ test("every English key has a Japanese translation and vice versa", () => {
   assert.deepEqual([...ja.keys()].filter((k) => lookup(en, k) === undefined), []);
 });
 
+// Deliberately empty: in English the demo user is already named "Gate Staff", so no " · Staff" suffix is added.
+// Japanese keeps its suffix because the name stays in English there.
+const MAY_BE_EMPTY = { en: new Set(["user.staffSuffix"]), ja: new Set() };
+
 test("no translation is empty", () => {
-  for (const [key, value] of [...en, ...ja]) assert.ok(String(value).trim().length > 0, key);
+  for (const [lang, map] of [["en", en], ["ja", ja]]) {
+    for (const [key, value] of map) {
+      if (MAY_BE_EMPTY[lang].has(key)) continue;
+      assert.ok(String(value).trim().length > 0, `${lang}: ${key}`);
+    }
+  }
 });
 
 test("placeholders match between languages", () => {
