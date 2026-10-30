@@ -37,13 +37,14 @@ function formatter(name: FormatName, language: string): Intl.DateTimeFormat {
 }
 
 // 12-hour clock everywhere. en-IN writes "7:42 pm"; English UI shows "7:42 PM", Japanese keeps "午後7:42".
+// Deliberately not formatToParts: Hermes (React Native's engine) disables it on iOS (facebook/hermes#1172),
+// so the native app would fail on every screen that shows a time. Plain format() works on every engine.
 function format12h(name: "dateTime" | "time", iso: string, language: string): string {
-  return formatter(name, language)
-    .formatToParts(new Date(iso))
-    .map((part) => (part.type === "dayPeriod" && language !== "ja" ? part.value.toUpperCase() : part.value))
-    .join("")
-    // ICU puts a narrow no-break space (U+202F) before AM/PM; some Android fonts draw it as a box.
+  const text = formatter(name, language)
+    .format(new Date(iso))
+    // ICU puts a narrow no-break space (U+202F) before am/pm; some Android fonts draw it as a box.
     .replace(/\u202f/g, " ");
+  return language === "ja" ? text : text.replace(/\b(am|pm)\b/g, (period) => period.toUpperCase());
 }
 
 export function formatEventDateTime(iso: string, language: string): string {
