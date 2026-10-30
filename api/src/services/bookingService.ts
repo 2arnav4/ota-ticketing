@@ -4,8 +4,6 @@ import { generateTicketCode } from "../domain/ticketCode";
 import { Prisma } from "../generated/prisma/client";
 import { ticketWithEvent, type TicketView } from "./ticketView";
 
-type Tx = Prisma.TransactionClient;
-
 export type BookingRequestInput = {
   userId: string;
   eventId: string;
@@ -29,6 +27,17 @@ export type BookingResult = { tickets: TicketView[]; replayed: boolean };
  * ever booking twice, including when the first attempt reached the server but its reply was lost.
  */
 export async function bookTickets(input: BookingRequestInput, now = new Date()): Promise<BookingResult> {
+  try {
+    return await bookWithReplay(input, now);
+  } catch (error) {
+    if (error instanceof BookingRejected) {
+      throw await explainRejectedBooking(input.eventId, input.quantity, now);
+    }
+    throw error;
+  }
+}
+
+async function bookWithReplay(input: BookingRequestInput, now: Date): Promise<BookingResult> {
   const earlier = await findReplay(input);
   if (earlier) {
     return earlier;
@@ -81,8 +90,10 @@ function bookOnce({ userId, eventId, quantity, idempotencyKey }: BookingRequestI
         data: { ticketsLeft: { decrement: quantity } },
       });
       if (count === 0) {
-        // Throwing rolls back the key claim too, so the same key can be retried later.
-        throw await explainRejectedBooking(tx, eventId, quantity, now);
+        // Throwing rolls back the key claim too, so the same key can be retried later. The reason is looked up
+        // AFTER the rollback (see bookTickets): a read in here would use this transaction's snapshot, which can be
+        // older than the booking that just took the last ticket, and report "Only 1 left" for a sold-out event.
+        throw new BookingRejected();
       }
 
       const codes = Array.from({ length: quantity }, generateTicketCode);
@@ -97,9 +108,13 @@ function bookOnce({ userId, eventId, quantity, idempotencyKey }: BookingRequestI
   );
 }
 
-// Runs only after the guarded UPDATE matched nothing, to tell the client which rule it hit.
-async function explainRejectedBooking(tx: Tx, eventId: string, quantity: number, now: Date): Promise<AppError> {
-  const event = await tx.event.findUnique({ where: { id: eventId }, select: { ticketsLeft: true, startsAt: true } });
+/** The guarded UPDATE matched nothing. Carries no data on purpose: the reason is read fresh after rollback. */
+class BookingRejected extends Error {}
+
+// Runs only after the guarded UPDATE matched nothing (and its transaction rolled back), to tell the client which
+// rule it hit. A plain read outside any transaction sees the latest committed stock.
+async function explainRejectedBooking(eventId: string, quantity: number, now: Date): Promise<AppError> {
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { ticketsLeft: true, startsAt: true } });
   if (!event) {
     return new AppError(404, "EVENT_NOT_FOUND", "Event not found");
   }

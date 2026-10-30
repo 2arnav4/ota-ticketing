@@ -50,6 +50,18 @@ describe("Idempotency-Key on POST /events/:id/book", () => {
     expect(await prisma.bookingRequest.count()).toBe(1);
   });
 
+  it("racing keyed bookings for the last tickets: losers are told SOLD_OUT, never a stale 'Only 1 left'", async () => {
+    // Regression: the key claim's read pinned the transaction snapshot, so the rejection reason was computed
+    // from stock as it was before the winner committed.
+    const results = await Promise.all(
+      Array.from({ length: 10 }, (_, i) => book(SEED_EVENTS.delhiDay2.id, 1, randomUUID(), i % 2 ? rohan : SEED_USERS.aiko.id)),
+    );
+    const losers = results.filter((r) => r.status === 409);
+    expect(results.filter((r) => r.status === 201)).toHaveLength(2);
+    expect(losers).toHaveLength(8);
+    expect(new Set(losers.map((r) => r.body.error.code))).toEqual(new Set(["SOLD_OUT"]));
+  });
+
   it("a refused booking keeps nothing, so the same key can be retried", async () => {
     const key = randomUUID();
     const refused = await book(SEED_EVENTS.delhiDay2.id, 3, key); // only 2 left
