@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
+import { type PressState } from "@/utils/pressState";
 import { colors, radius, space } from "@/theme/tokens";
 
 type Props = { label: string; onPress: () => void; disabled?: boolean; loading?: boolean };
@@ -12,7 +13,7 @@ export function PrimaryButton({ label, onPress, disabled = false, loading = fals
       accessibilityState={{ disabled: inactive, busy: loading }}
       disabled={inactive}
       onPress={onPress}
-      style={({ pressed, hovered }) => [
+      style={({ pressed, hovered }: PressState) => [
         styles.button,
         disabled && styles.disabled,
         hovered && !inactive && styles.hovered,

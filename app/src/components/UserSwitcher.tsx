@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { DEMO_USERS } from "@/config/demoUsers";
 import { useSession } from "@/state/session";
+import { type PressState } from "@/utils/pressState";
 import { colors, radius, space, touch } from "@/theme/tokens";
 
 // Stand-in for login (out of scope per the brief): picks which seeded user's ID goes in X-User-Id.
@@ -20,7 +21,7 @@ export function UserSwitcher() {
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             onPress={() => setUserId(user.id)}
-            style={({ hovered }) => [styles.chip, active ? styles.chipActive : hovered && styles.chipHover]}
+            style={({ hovered }: PressState) => [styles.chip, active ? styles.chipActive : hovered && styles.chipHover]}
           >
             <Text style={[styles.text, active && styles.textActive]}>
               {user.name}

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { type PressState } from "@/utils/pressState";
 import { colors, radius, touch, type } from "@/theme/tokens";
 
 type Props = { value: number; min: number; max: number; disabled?: boolean; onChange: (next: number) => void };
@@ -28,7 +29,7 @@ function StepButton(props: { label: string; accessibilityLabel: string; enabled:
       accessibilityState={{ disabled: !props.enabled }}
       disabled={!props.enabled}
       onPress={props.onPress}
-      style={({ pressed, hovered }) => [
+      style={({ pressed, hovered }: PressState) => [
         styles.button,
         !props.enabled && styles.disabled,
         hovered && props.enabled && styles.hovered,
