@@ -13,6 +13,8 @@ const EnvSchema = z.object({
     .transform((value) => value === "true"),
   PORT: z.coerce.number().int().positive().default(4000),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
+  // Per-IP writes (book, check-in) per minute, per instance. Tests raise it so parallel bursts aren't throttled.
+  RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(30),
   CORS_ORIGINS: z
     .string()
     .default("")

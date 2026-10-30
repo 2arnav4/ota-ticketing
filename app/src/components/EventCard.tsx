@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import type { EventSummary } from "@/api/types";
 import { colors, radius, space, type } from "@/theme/tokens";
 import { formatDateChip, formatEventDateTime, formatINR } from "@/utils/format";
+import { BookingPanel } from "./BookingPanel";
 import { StockBadge } from "./StockBadge";
 
 export function EventCard({ event }: { event: EventSummary }) {
@@ -27,6 +28,7 @@ export function EventCard({ event }: { event: EventSummary }) {
         <Text style={styles.price}>{formatINR(event.pricePaise)}</Text>
         <StockBadge ticketsLeft={event.ticketsLeft} />
       </View>
+      <BookingPanel event={event} />
     </View>
   );
 }
