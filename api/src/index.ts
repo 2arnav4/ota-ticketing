@@ -1,10 +1,14 @@
-import { createApp, logger } from "./app";
+import type { Express } from "express";
+import { createApp, logger } from "./createApp";
 import { env } from "./config/env";
 import { prisma } from "./db/prisma";
 
-const app = createApp();
+// Typed with express here on purpose: Vercel only treats an entry file that imports express as an Express app.
+const app: Express = createApp();
 
-// Vercel imports the default export and runs it as a function; it sets VERCEL=1. Locally we bind a port.
+// Vercel's entry point. It looks for app.*, index.* or server.* (in that order) and needs the Express app as
+// the default export, so the factory lives in createApp.ts and this is the only file named like an entry.
+// Vercel sets VERCEL=1; locally we bind a port instead.
 if (!process.env.VERCEL) {
   const server = app.listen(env.PORT, () => logger.info(`API listening on http://localhost:${env.PORT}`));
 

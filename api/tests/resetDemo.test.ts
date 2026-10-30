@@ -10,7 +10,7 @@ function appWithSecret(secret: string | undefined) {
   if (secret) process.env.CRON_SECRET = secret;
   else delete process.env.CRON_SECRET;
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { createApp } = require("../src/app") as typeof import("../src/app");
+  const { createApp } = require("../src/createApp") as typeof import("../src/createApp");
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const db = require("../src/db/prisma") as typeof import("../src/db/prisma");
   return { app: createApp(), db: db.prisma };

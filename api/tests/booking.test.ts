@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { seedDemoData } from "../prisma/seed";
 import { SEED_EVENTS, SEED_USERS } from "../prisma/seedData";
-import { createApp } from "../src/app";
+import { createApp } from "../src/createApp";
 import { prisma } from "../src/db/prisma";
 
 const app = createApp();
