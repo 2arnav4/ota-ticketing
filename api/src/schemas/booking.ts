@@ -9,3 +9,7 @@ export const EventIdParams = z.object({ id: z.uuid() });
 export const BookingBody = z.strictObject({
   quantity: z.number().int().min(1).max(MAX_TICKETS_PER_BOOKING),
 });
+
+// Optional header. When present it must be a UUID: the client generates one per booking attempt and reuses it
+// only to resend that same attempt.
+export const IdempotencyHeader = z.uuid().optional();

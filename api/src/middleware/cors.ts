@@ -7,6 +7,7 @@ export const corsMiddleware = cors({
     callback(null, !origin || env.CORS_ORIGINS.includes(origin));
   },
   methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "X-User-Id"],
+  allowedHeaders: ["Content-Type", "X-User-Id", "Idempotency-Key"],
+  exposedHeaders: ["Idempotent-Replayed"],
   maxAge: 600,
 });
