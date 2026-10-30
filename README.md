@@ -156,6 +156,10 @@ on a 2-left event → exactly 2 succeed; 5 parallel scans of one code → exactl
 ```bash
 cd api && npm test        # 86 Jest tests, real MySQL test DB
 cd app && npm test && npm run typecheck && npm run lint
+cd api && npm run race    # 20 simultaneous bookings on the 2-left event: exactly 2 must win (local only)
+cd api && npm run dev:logs   # API with readable logs: one line per booking, check-in and rejection
 ```
 
-See `GAUNTLET.md` for the concurrency, security and load test results.
+- `TEST_PLAN.md`: the full manual test plan (phone, desktop and phone browsers, race conditions, two devices
+  on one account, curl checks).
+- `GAUNTLET.md`: concurrency, load and security test results.

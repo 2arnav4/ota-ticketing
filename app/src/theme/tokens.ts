@@ -19,6 +19,10 @@ export const colors = {
   eventAccent: "#6F3291",
 } as const;
 
+// Phones use the full width; on tablets and desktop browsers content stays a readable centred column
+// instead of stretching cards and buttons across a 1440px screen.
+export const layout = { maxContentWidth: 720 } as const;
+
 export const radius = { card: 14, pill: 999 } as const;
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 } as const;

@@ -8,12 +8,14 @@ import { EmptyState } from "@/components/EmptyState";
 import { ErrorState } from "@/components/ErrorState";
 import { EventCardSkeleton } from "@/components/EventCardSkeleton";
 import { TicketCard } from "@/components/TicketCard";
+import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import { useTickets } from "@/hooks/useTickets";
-import { colors, space } from "@/theme/tokens";
+import { colors, layout, space } from "@/theme/tokens";
 
 export default function TicketsScreen() {
   const { t, i18n } = useTranslation();
   const { data: tickets, isPending, isError, error, refetch, isRefetching } = useTickets();
+  useRefreshOnFocus(refetch);
   // Set by the Events screen after a successful booking; cleared when the banner is dismissed.
   const { booked } = useLocalSearchParams<{ booked?: string }>();
 
@@ -62,5 +64,5 @@ export default function TicketsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  list: { padding: space.lg, gap: space.md },
+  list: { padding: space.lg, gap: space.md, width: "100%", maxWidth: layout.maxContentWidth, alignSelf: "center" },
 });

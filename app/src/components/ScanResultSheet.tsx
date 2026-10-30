@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ApiError, NetworkError } from "@/api/client";
 import type { CheckedInTicket } from "@/api/types";
-import { colors, radius, space, type } from "@/theme/tokens";
+import { colors, layout, radius, space, type } from "@/theme/tokens";
 import { formatDateAndTime, formatTicketCode } from "@/utils/format";
 
 type Props = { ticket?: CheckedInTicket; error?: unknown; onNext: () => void };
@@ -62,6 +62,9 @@ export function ScanResultSheet({ ticket, error, onNext }: Props) {
 
 const styles = StyleSheet.create({
   sheet: {
+    width: "100%",
+    maxWidth: layout.maxContentWidth,
+    alignSelf: "center",
     backgroundColor: colors.surface,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,

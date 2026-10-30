@@ -38,6 +38,10 @@ export function createApp({
         res.setHeader("X-Request-Id", id);
         return id;
       },
+      // Method, path and status in the message itself, so a log line reads on its own: "POST /events/…/book → 409".
+      // originalUrl, not url: routers rewrite req.url to the part after their mount path ("/events" → "/").
+      customSuccessMessage: (req, res) => `${req.method} ${(req as express.Request).originalUrl ?? req.url} → ${res.statusCode}`,
+      customErrorMessage: (req, res) => `${req.method} ${(req as express.Request).originalUrl ?? req.url} → ${res.statusCode}`,
     }),
   );
   app.use(helmet());

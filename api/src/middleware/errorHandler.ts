@@ -13,6 +13,8 @@ export const notFound: RequestHandler = () => {
 // Prisma and driver errors fall into the last branch, so their messages never reach the client.
 export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (err instanceof AppError) {
+    // Expected outcomes (409 sold out, 403, 400...), logged with their code so the reason is visible, not just the status.
+    req.log.info({ code: err.code, status: err.status, details: err.details }, "request rejected");
     res.status(err.status).json(errorBody(err));
     return;
   }
