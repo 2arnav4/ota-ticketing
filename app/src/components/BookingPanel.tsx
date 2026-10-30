@@ -38,14 +38,15 @@ function bookingErrorMessage(error: unknown, t: TFunction): string {
 export function BookingPanel({ event }: { event: EventSummary }) {
   const { t } = useTranslation();
   const { userId } = useSession();
-  const [requested, setRequested] = useState(1);
+  // Starts at 0: the buyer picks a quantity on purpose, and Book stays disabled until they do.
+  const [requested, setRequested] = useState(0);
   // mutationFn, retries and outcome handling come from the defaults in state/bookingQueue.
   const book = useMutation<Ticket[], unknown, BookingVariables>({ mutationKey: BOOK_MUTATION_KEY });
   const pending = usePendingBookings(userId, event.id);
 
   const max = Math.min(MAX_PER_BOOKING, event.ticketsLeft);
   // Clamp on render: if stock drops below the chosen quantity after a refetch, the stepper follows it down.
-  const quantity = Math.max(1, Math.min(requested, max));
+  const quantity = Math.max(0, Math.min(requested, max));
   // Errors of a queued booking arrive as a banner; only an online tap shows its error here.
   const inlineError = book.isError && !book.variables?.queued ? bookingErrorMessage(book.error, t) : null;
 
@@ -75,9 +76,10 @@ export function BookingPanel({ event }: { event: EventSummary }) {
   }
 
   const onBook = () => {
+    if (quantity === 0) return;
     book.mutate(newBookingVariables({ userId, eventId: event.id, eventName: event.name, quantity }), {
       onSuccess: (_tickets, variables) => {
-        setRequested(1);
+        setRequested(0);
         // Online taps go straight to the tickets; a queued one confirms later via a banner, wherever the user is.
         if (!variables.queued) router.push("/tickets");
       },
@@ -87,7 +89,7 @@ export function BookingPanel({ event }: { event: EventSummary }) {
   return (
     <View style={styles.panel}>
       <View style={styles.row}>
-        <QuantityStepper value={quantity} min={1} max={max} disabled={book.isPending} onChange={setRequested} />
+        <QuantityStepper value={quantity} min={0} max={max} disabled={book.isPending} onChange={setRequested} />
         <View style={styles.total}>
           <Text style={styles.totalLabel}>{t("events.total")}</Text>
           <Text style={styles.totalValue}>{formatINR(event.pricePaise * quantity)}</Text>
@@ -95,7 +97,8 @@ export function BookingPanel({ event }: { event: EventSummary }) {
       </View>
       {inlineError ? <Text style={styles.error}>{inlineError}</Text> : null}
       {/* Disabled while pending stops double-tap double-booking in the UI. The server's guarded UPDATE is the real rule. */}
-      <PrimaryButton label={t("events.bookNow")} onPress={onBook} loading={book.isPending} />
+      {/* The API only accepts 1-4; at 0 there is nothing to book, so 0 is never sent. */}
+      <PrimaryButton label={t("events.bookNow")} onPress={onBook} loading={book.isPending} disabled={quantity === 0} />
     </View>
   );
 }
