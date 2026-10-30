@@ -7,7 +7,19 @@ Express + MySQL API, Expo (React Native) app for iOS, Android and web.
 |---|---|
 | Live web app | **https://ota-ticketing.vercel.app** (phone or desktop browser) |
 | Live API | **https://ota-ticketing-api.vercel.app** (`/health` shows DB status) |
+| Demo video | **https://www.loom.com/share/e96e1bd91b034dfaab33f0812152640a** (booking a ticket, the QR, gate check-in) |
 | Stack | Node 24, Express 5, Prisma 7, MySQL 8 · Expo SDK 58, Expo Router, React Query, i18next |
+
+## On a phone
+
+The live site on an iPhone (Safari). Gate Staff scans a fan's QR from another screen: the first scan checks the
+ticket in, and a second scan of the same QR is refused with the time of the first check-in.
+
+<p>
+  <img src="screenshots/iphone-checked-in.jpeg" width="260" alt="Scan screen on an iPhone: green Checked in, Rohan Mehta, Ōta TOKYO Delhi: Day 1, code BTWY-MSFW-VBB0" />
+  &nbsp;&nbsp;
+  <img src="screenshots/iphone-already-checked-in.jpeg" width="260" alt="The same QR scanned again: amber Already checked in, first scanned 30 Oct 2026 · 9:04 PM IST, do not admit again" />
+</p>
 
 ## Test the live site (reviewers)
 
@@ -77,7 +89,7 @@ More requests (validation, 403 for fans checking in, sold-out and past events) a
 - **Camera:** works in phone browsers because the site is HTTPS. On a laptop, type the code instead.
 - **Identity is a demo header, not security.** Anyone can act as any demo user, including Gate Staff; real login
   would replace it (see Known gaps).
-- **Run it yourself:** everything also runs locally (next section), and `TEST_PLAN.md` has a 15-point checklist.
+- **Run it yourself:** everything also runs locally (next section).
 
 ## Run it locally
 
@@ -222,11 +234,10 @@ Database migrations are never part of a deploy; run step 2 by hand first when a 
 ## Tests
 
 ```bash
-cd api && npm test        # 86 Jest tests, real MySQL test DB
+cd api && npm test        # 97 Jest tests, real MySQL test DB
 cd app && npm test && npm run typecheck && npm run lint
 cd api && npm run race    # 20 simultaneous bookings on the 2-left event: exactly 2 must win (local only)
 cd api && npm run dev:logs   # API with readable logs: one line per booking, check-in and rejection
 ```
 
-- `TEST_PLAN.md`: a 15-point feature checklist (live site or local) and a one-minute race-condition test.
 - `GAUNTLET.md`: concurrency, load and security test results.

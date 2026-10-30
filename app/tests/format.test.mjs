@@ -39,3 +39,18 @@ test("language changes the writing, not the zone", () => {
 test("formatTicketCode groups 12 characters in fours for reading", () => {
   assert.equal(formatTicketCode("7K3M9QX2RB4D"), "7K3M-9QX2-RB4D");
 });
+
+test("works without Intl formatToParts, as on Hermes for iOS (facebook/hermes#1172)", async () => {
+  const original = Intl.DateTimeFormat.prototype.formatToParts;
+  Intl.DateTimeFormat.prototype.formatToParts = undefined;
+  try {
+    // Fresh module instance so no formatter was built while formatToParts still existed.
+    const fmt = await import(`../src/utils/format.ts?nofp=${Date.now()}`);
+    assert.equal(fmt.formatTime("2026-10-30T14:12:00.000Z", "en"), "7:42 PM");
+    assert.match(fmt.formatEventDateTime("2026-11-28T05:30:00.000Z", "en"), /11:00 AM$/);
+    assert.equal(fmt.formatDateAndTime("2026-08-15T07:12:00.000Z", "en"), "15 Aug 2026 · 12:42 PM");
+    assert.equal(fmt.formatTime("2026-10-30T14:12:00.000Z", "ja"), "午後7:42");
+  } finally {
+    Intl.DateTimeFormat.prototype.formatToParts = original;
+  }
+});
