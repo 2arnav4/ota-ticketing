@@ -38,7 +38,8 @@
         {
           "cameraPermission": "Allow Ōta Tickets to use the camera to scan ticket QR codes at the gate."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { DEMO_USERS } from "@/config/demoUsers";
 import { useSession } from "@/state/session";
@@ -6,6 +7,7 @@ import { colors, radius, space } from "@/theme/tokens";
 // Stand-in for login (out of scope per the brief): picks which seeded user's ID goes in X-User-Id.
 export function UserSwitcher() {
   const { userId, setUserId } = useSession();
+  const { t } = useTranslation();
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
@@ -21,7 +23,7 @@ export function UserSwitcher() {
           >
             <Text style={[styles.text, active && styles.textActive]}>
               {user.name}
-              {user.role === "STAFF" ? " · Staff" : ""}
+              {user.role === "STAFF" ? t("user.staffSuffix") : ""}
             </Text>
           </Pressable>
         );

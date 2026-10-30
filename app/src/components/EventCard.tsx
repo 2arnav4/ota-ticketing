@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import type { EventSummary } from "@/api/types";
 import { colors, radius, space, type } from "@/theme/tokens";
@@ -6,7 +7,8 @@ import { BookingPanel } from "./BookingPanel";
 import { StockBadge } from "./StockBadge";
 
 export function EventCard({ event }: { event: EventSummary }) {
-  const chip = formatDateChip(event.startsAt);
+  const { t, i18n } = useTranslation();
+  const chip = formatDateChip(event.startsAt, i18n.language);
   const isOtaEvent = event.name.startsWith("Ōta");
 
   return (
@@ -21,7 +23,7 @@ export function EventCard({ event }: { event: EventSummary }) {
           <Text style={styles.meta}>
             {event.venue}, {event.city}
           </Text>
-          <Text style={styles.meta}>{formatEventDateTime(event.startsAt)} IST</Text>
+          <Text style={styles.meta}>{formatEventDateTime(event.startsAt, i18n.language)} {t("events.ist")}</Text>
         </View>
       </View>
       <View style={styles.footer}>

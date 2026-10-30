@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppHeader } from "@/components/AppHeader";
@@ -8,11 +9,12 @@ import { useEvents } from "@/hooks/useEvents";
 import { colors, space } from "@/theme/tokens";
 
 export default function EventsScreen() {
+  const { t, i18n } = useTranslation();
   const { data: events, isPending, isError, error, refetch, isRefetching } = useEvents();
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <AppHeader title="Events" />
+      <AppHeader title={t("tabs.events")} />
       {isPending ? (
         <View style={styles.list}>
           {[0, 1, 2].map((key) => (
@@ -26,6 +28,8 @@ export default function EventsScreen() {
       ) : (
         <FlatList
           data={events}
+          // FlatList skips re-rendering rows unless data or extraData change; the language must count.
+          extraData={i18n.language}
           keyExtractor={(event) => event.id}
           renderItem={({ item }) => <EventCard event={item} />}
           contentContainerStyle={styles.list}

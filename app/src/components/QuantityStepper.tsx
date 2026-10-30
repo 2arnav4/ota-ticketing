@@ -1,19 +1,21 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, radius, space } from "@/theme/tokens";
 
 type Props = { value: number; min: number; max: number; disabled?: boolean; onChange: (next: number) => void };
 
 export function QuantityStepper({ value, min, max, disabled = false, onChange }: Props) {
+  const { t } = useTranslation();
   const canDecrease = !disabled && value > min;
   const canIncrease = !disabled && value < max;
 
   return (
     <View style={styles.row}>
-      <StepButton label="−" accessibilityLabel="Fewer tickets" enabled={canDecrease} onPress={() => onChange(value - 1)} />
-      <Text style={styles.value} accessibilityLabel={`${value} tickets`}>
+      <StepButton label="−" accessibilityLabel={t("events.fewer")} enabled={canDecrease} onPress={() => onChange(value - 1)} />
+      <Text style={styles.value} accessibilityLabel={t("events.ticketsCount", { count: value })}>
         {value}
       </Text>
-      <StepButton label="+" accessibilityLabel="More tickets" enabled={canIncrease} onPress={() => onChange(value + 1)} />
+      <StepButton label="+" accessibilityLabel={t("events.more")} enabled={canIncrease} onPress={() => onChange(value + 1)} />
     </View>
   );
 }

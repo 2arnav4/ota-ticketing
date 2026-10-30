@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from "expo-camera";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -11,6 +12,7 @@ import { useMe } from "@/hooks/useMe";
 import { colors, radius, space, type } from "@/theme/tokens";
 
 export default function ScanScreen() {
+  const { t } = useTranslation();
   const { data: me } = useMe();
   const [permission, requestPermission] = useCameraPermissions();
   const checkin = useCheckin();
@@ -47,15 +49,15 @@ export default function ScanScreen() {
   if (me && me.role !== "STAFF") {
     return (
       <SafeAreaView style={styles.screen} edges={["top"]}>
-        <AppHeader title="Scan" />
-        <Text style={styles.notice}>Scanning is for gate staff. Switch to Gate Staff above.</Text>
+        <AppHeader title={t("tabs.scan")} />
+        <Text style={styles.notice}>{t("scan.staffOnlyNotice")}</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <AppHeader title="Scan" />
+      <AppHeader title={t("tabs.scan")} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.viewfinder}>
           {permission?.granted && focused ? (
@@ -69,19 +71,19 @@ export default function ScanScreen() {
             <View style={styles.cameraOff}>
               <Text style={styles.cameraOffText}>
                 {permission?.canAskAgain === false
-                  ? "Camera access is off. Enable it in Settings, or type the code below."
-                  : "Allow the camera to scan ticket QR codes."}
+                  ? t("scan.cameraBlocked")
+                  : t("scan.allowPrompt")}
               </Text>
               {permission?.canAskAgain !== false ? (
                 <Pressable accessibilityRole="button" onPress={() => void requestPermission()} style={styles.allow}>
-                  <Text style={styles.allowText}>Allow camera</Text>
+                  <Text style={styles.allowText}>{t("scan.allowButton")}</Text>
                 </Pressable>
               ) : null}
             </View>
           )}
           {checkin.isPending ? (
             <View style={styles.pending}>
-              <Text style={styles.pendingText}>Checking…</Text>
+              <Text style={styles.pendingText}>{t("scan.checking")}</Text>
             </View>
           ) : null}
         </View>

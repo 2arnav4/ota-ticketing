@@ -1,4 +1,5 @@
-// Money is integer paise everywhere; this is the only place it becomes a display string. "₹1,062" style.
+// Money is integer paise everywhere; this is the only place it becomes a display string ("₹1,062").
+// Always Indian grouping, even in the Japanese UI: the currency is INR.
 const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 
 export function formatINR(paise: number): string {
@@ -6,44 +7,56 @@ export function formatINR(paise: number): string {
 }
 
 // Event times are stored as UTC instants and always shown in IST, whatever the device's time zone.
+// The language only changes how the date is written (en-IN vs ja-JP), never the zone.
 const IST = "Asia/Kolkata";
 
-const dateTime = new Intl.DateTimeFormat("en-IN", {
-  timeZone: IST,
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
-const dayOfMonth = new Intl.DateTimeFormat("en-IN", { timeZone: IST, day: "numeric" });
-const shortMonth = new Intl.DateTimeFormat("en-IN", { timeZone: IST, month: "short" });
+const FORMATS = {
+  dateTime: { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" },
+  day: { day: "numeric" },
+  month: { month: "short" },
+  time: { hour: "2-digit", minute: "2-digit", hourCycle: "h23" },
+  date: { day: "numeric", month: "short", year: "numeric" },
+} satisfies Record<string, Intl.DateTimeFormatOptions>;
 
-export function formatEventDateTime(iso: string): string {
-  return dateTime.format(new Date(iso));
+type FormatName = keyof typeof FORMATS;
+
+// Intl formatters are expensive to build; keep one per (locale, format).
+const cache = new Map<string, Intl.DateTimeFormat>();
+
+// `language` is an explicit argument on purpose. The React Compiler memoizes calls by their inputs; a formatter
+// that read the current language from a global would keep returning the old language after a switch.
+function formatter(name: FormatName, language: string): Intl.DateTimeFormat {
+  const locale = language === "ja" ? "ja-JP" : "en-IN";
+  const key = `${locale}:${name}`;
+  let cached = cache.get(key);
+  if (!cached) {
+    cached = new Intl.DateTimeFormat(locale, { ...FORMATS[name], timeZone: IST });
+    cache.set(key, cached);
+  }
+  return cached;
 }
 
-export function formatDateChip(iso: string): { day: string; month: string } {
+export function formatEventDateTime(iso: string, language: string): string {
+  return formatter("dateTime", language).format(new Date(iso));
+}
+
+export function formatDateChip(iso: string, language: string): { day: string; month: string } {
   const date = new Date(iso);
-  return { day: dayOfMonth.format(date), month: shortMonth.format(date).toUpperCase() };
+  return { day: formatter("day", language).format(date).replace(/日$/, ""), month: formatter("month", language).format(date).toUpperCase() };
+}
+
+/** "18:42" in IST, for check-in badges. */
+export function formatTime(iso: string, language: string): string {
+  return formatter("time", language).format(new Date(iso));
+}
+
+/** "15 Aug 2026 · 18:42" in IST. */
+export function formatDateAndTime(iso: string, language: string): string {
+  return `${formatter("date", language).format(new Date(iso))} · ${formatTime(iso, language)}`;
 }
 
 export function formatCount(n: number): string {
   return n.toLocaleString("en-IN");
-}
-
-const timeOnly = new Intl.DateTimeFormat("en-IN", { timeZone: IST, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-const dateOnly = new Intl.DateTimeFormat("en-IN", { timeZone: IST, day: "numeric", month: "short", year: "numeric" });
-
-/** "18:42" in IST, for check-in badges. */
-export function formatTime(iso: string): string {
-  return timeOnly.format(new Date(iso));
-}
-
-/** "15 Aug 2026 · 18:42" in IST. */
-export function formatDateAndTime(iso: string): string {
-  return `${dateOnly.format(new Date(iso))} · ${formatTime(iso)}`;
 }
 
 /** "7K3M9QX2RB4D" → "7K3M-9QX2-RB4D". Display only; the QR and the API use the raw 12 characters. */

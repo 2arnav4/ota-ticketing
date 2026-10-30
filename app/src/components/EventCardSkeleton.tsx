@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import { colors, radius, space } from "@/theme/tokens";
 
 export function EventCardSkeleton() {
+  const { t } = useTranslation();
   return (
-    <View style={styles.card} accessibilityLabel="Loading">
+    <View style={styles.card} accessibilityLabel={t("errors.loading")}>
       <View style={styles.row}>
         <View style={styles.chip} />
         <View style={styles.lines}>

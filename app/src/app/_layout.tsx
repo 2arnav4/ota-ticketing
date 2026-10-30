@@ -1,7 +1,9 @@
+// Must stay first: importing @/i18n initialises i18next before any screen calls useTranslation.
+import { restoreSavedLanguage } from "@/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ApiError } from "@/api/client";
 import { SessionProvider } from "@/state/session";
@@ -18,6 +20,10 @@ export default function RootLayout() {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: shouldRetry, staleTime: 15_000 } } }),
   );
+
+  useEffect(() => {
+    void restoreSavedLanguage();
+  }, []);
 
   return (
     <SafeAreaProvider>

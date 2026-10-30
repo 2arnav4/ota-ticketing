@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text } from "react-native";
 import { colors, radius, space } from "@/theme/tokens";
 
 export function Banner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+  const { t } = useTranslation();
   return (
-    <Pressable accessibilityRole="button" accessibilityHint="Dismiss" onPress={onDismiss} style={styles.banner}>
+    <Pressable accessibilityRole="button" accessibilityHint={t("banner.dismiss")} onPress={onDismiss} style={styles.banner}>
       <Text style={styles.text}>{message}</Text>
       <Text style={styles.close}>✕</Text>
     </Pressable>

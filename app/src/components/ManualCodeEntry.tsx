@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { colors, radius, space, type } from "@/theme/tokens";
 
 // Fallback for a damaged QR, a denied camera, or a browser without camera access. Server normalises the input.
 export function ManualCodeEntry({ disabled, onSubmit }: { disabled: boolean; onSubmit: (code: string) => void }) {
+  const { t } = useTranslation();
   const [code, setCode] = useState("");
   const canSubmit = !disabled && code.trim().length > 0;
 
@@ -15,7 +17,7 @@ export function ManualCodeEntry({ disabled, onSubmit }: { disabled: boolean; onS
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>Or type the code</Text>
+      <Text style={styles.label}>{t("scan.typeCode")}</Text>
       <View style={styles.row}>
         <TextInput
           value={code}
@@ -27,7 +29,7 @@ export function ManualCodeEntry({ disabled, onSubmit }: { disabled: boolean; onS
           autoCorrect={false}
           maxLength={20}
           editable={!disabled}
-          accessibilityLabel="Ticket code"
+          accessibilityLabel={t("scan.codeLabel")}
           style={styles.input}
         />
         <Pressable
@@ -36,7 +38,7 @@ export function ManualCodeEntry({ disabled, onSubmit }: { disabled: boolean; onS
           onPress={submit}
           style={({ pressed }) => [styles.button, !canSubmit && { opacity: 0.4 }, pressed && { opacity: 0.7 }]}
         >
-          <Text style={styles.buttonText}>Check in</Text>
+          <Text style={styles.buttonText}>{t("scan.checkIn")}</Text>
         </Pressable>
       </View>
     </View>
