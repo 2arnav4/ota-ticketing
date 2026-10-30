@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import { colors, space, type } from "@/theme/tokens";
+import { colors, layout, space, type } from "@/theme/tokens";
 import { LanguagePill } from "./LanguagePill";
 import { UserSwitcher } from "./UserSwitcher";
 
@@ -20,7 +20,7 @@ export function AppHeader({ title }: { title: string }) {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.md, gap: space.md },
+  header: { paddingHorizontal: space.lg, paddingTop: space.sm, paddingBottom: space.md, gap: space.md, width: "100%", maxWidth: layout.maxContentWidth, alignSelf: "center" },
   titleRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   spacer: { flex: 1 },
   wordmark: { fontSize: 28, fontWeight: "800", color: colors.gradientStart },

@@ -9,7 +9,7 @@ import { ErrorState } from "@/components/ErrorState";
 import { EventCardSkeleton } from "@/components/EventCardSkeleton";
 import { TicketCard } from "@/components/TicketCard";
 import { useTickets } from "@/hooks/useTickets";
-import { colors, space } from "@/theme/tokens";
+import { colors, layout, space } from "@/theme/tokens";
 
 export default function TicketsScreen() {
   const { t, i18n } = useTranslation();
@@ -62,5 +62,5 @@ export default function TicketsScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  list: { padding: space.lg, gap: space.md },
+  list: { padding: space.lg, gap: space.md, width: "100%", maxWidth: layout.maxContentWidth, alignSelf: "center" },
 });

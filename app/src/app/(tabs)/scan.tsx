@@ -9,7 +9,7 @@ import { ManualCodeEntry } from "@/components/ManualCodeEntry";
 import { ScanResultSheet } from "@/components/ScanResultSheet";
 import { useCheckin } from "@/hooks/useCheckin";
 import { useMe } from "@/hooks/useMe";
-import { colors, radius, space, type } from "@/theme/tokens";
+import { colors, layout, radius, space, type } from "@/theme/tokens";
 
 export default function ScanScreen() {
   const { t } = useTranslation();
@@ -98,7 +98,7 @@ export default function ScanScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: space.lg, gap: space.lg },
+  content: { padding: space.lg, gap: space.lg, width: "100%", maxWidth: layout.maxContentWidth, alignSelf: "center" },
   viewfinder: {
     aspectRatio: 1,
     width: "100%",
