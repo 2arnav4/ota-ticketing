@@ -32,3 +32,21 @@ export function formatDateChip(iso: string): { day: string; month: string } {
 export function formatCount(n: number): string {
   return n.toLocaleString("en-IN");
 }
+
+const timeOnly = new Intl.DateTimeFormat("en-IN", { timeZone: IST, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const dateOnly = new Intl.DateTimeFormat("en-IN", { timeZone: IST, day: "numeric", month: "short", year: "numeric" });
+
+/** "18:42" in IST, for check-in badges. */
+export function formatTime(iso: string): string {
+  return timeOnly.format(new Date(iso));
+}
+
+/** "15 Aug 2026 · 18:42" in IST. */
+export function formatDateAndTime(iso: string): string {
+  return `${dateOnly.format(new Date(iso))} · ${formatTime(iso)}`;
+}
+
+/** "7K3M9QX2RB4D" → "7K3M-9QX2-RB4D". Display only; the QR and the API use the raw 12 characters. */
+export function formatTicketCode(code: string): string {
+  return code.match(/.{1,4}/g)?.join("-") ?? code;
+}
