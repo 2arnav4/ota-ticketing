@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMe } from "@/hooks/useMe";
 import { colors } from "@/theme/tokens";
 
@@ -9,7 +10,10 @@ function TabIcon({ name, focused, size }: { name: keyof typeof Ionicons.glyphMap
   return <Ionicons name={name} size={size} color={focused ? colors.ink : colors.muted} />;
 }
 
+const TAB_BAR_HEIGHT = 62;
+
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { data: me } = useMe();
   // UI convenience only: hides the tab for fans. The server's role check (M3) is what actually blocks them.
@@ -21,7 +25,18 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.ink,
         tabBarInactiveTintColor: colors.muted,
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        // The default 49px bar clipped the label's descenders, so "My Tickets" read as "Mv Tickets". The bar now
+        // sets its own height and padding; the bottom safe-area inset is added so iPhones keep the home-bar gap.
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          height: TAB_BAR_HEIGHT + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: insets.bottom + 8,
+        },
+        // flexShrink 0: the label sat in a flex column under the icon and was squeezed to 9px, cutting its text.
+        tabBarLabelStyle: { fontSize: 12, lineHeight: 16, fontWeight: "500", flexShrink: 0 },
+        tabBarItemStyle: { paddingVertical: 2 },
       }}
     >
       <Tabs.Screen
