@@ -38,7 +38,14 @@ export function BookingPanel({ event }: { event: EventSummary }) {
   const quantity = Math.max(1, Math.min(requested, max));
 
   if (event.ticketsLeft === 0) {
-    return <GradientButton label={t("events.soldOut")} onPress={() => undefined} disabled />;
+    // Lost a race: the 409 refetch flips the card to sold out. Keep the reason visible, or the user's tap
+    // seems to have done nothing.
+    return (
+      <View style={styles.panel}>
+        {book.isError ? <Text style={styles.error}>{bookingErrorMessage(book.error, t)}</Text> : null}
+        <GradientButton label={t("events.soldOut")} onPress={() => undefined} disabled />
+      </View>
+    );
   }
 
   const onBook = () => {
