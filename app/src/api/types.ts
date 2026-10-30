@@ -11,3 +11,11 @@ export type EventSummary = {
 };
 
 export type Me = { id: string; name: string; role: "FAN" | "STAFF" };
+
+export type Ticket = {
+  id: string;
+  code: string;
+  checkedInAt: string | null;
+  createdAt: string;
+  event: { id: string; name: string; venue: string; city: string; startsAt: string };
+};
