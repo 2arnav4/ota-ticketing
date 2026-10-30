@@ -13,6 +13,8 @@ export async function seedDemoData(prisma: PrismaClient): Promise<void> {
   await prisma.$transaction(async (tx) => {
     // Delete first: a ticket references its event, and stale bookings would contradict the restored stock.
     await tx.ticket.deleteMany({ where: { id: { notIn: seedTicketIds } } });
+    // Idempotency records belong to the bookings just deleted; a stale key would replay tickets that no longer exist.
+    await tx.bookingRequest.deleteMany({});
 
     for (const user of Object.values(SEED_USERS)) {
       await tx.user.upsert({

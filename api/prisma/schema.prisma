@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
   // CJS + bare imports: one output that tsx, ts-jest and Vercel's Node build all load without ESM config.
   moduleFormat        = "cjs"
   importFileExtension = ""
@@ -16,11 +16,12 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Char(36)
-  name      String   @db.VarChar(80)
-  role      Role     @default(FAN)
-  createdAt DateTime @default(now())
-  tickets   Ticket[]
+  id              String           @id @default(uuid()) @db.Char(36)
+  name            String           @db.VarChar(80)
+  role            Role             @default(FAN)
+  createdAt       DateTime         @default(now())
+  tickets         Ticket[]
+  bookingRequests BookingRequest[]
 }
 
 model Event {
@@ -42,16 +43,36 @@ model Event {
 }
 
 model Ticket {
-  id          String    @id @default(uuid()) @db.Char(36)
+  id               String          @id @default(uuid()) @db.Char(36)
   /// 12 chars of Crockford base32; unique so a scanned code maps to exactly one ticket.
-  code        String    @unique @db.Char(12)
-  eventId     String    @db.Char(36)
-  userId      String    @db.Char(36)
-  checkedInAt DateTime?
-  createdAt   DateTime  @default(now())
-  event       Event     @relation(fields: [eventId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
+  code             String          @unique @db.Char(12)
+  eventId          String          @db.Char(36)
+  userId           String          @db.Char(36)
+  checkedInAt      DateTime?
+  createdAt        DateTime        @default(now())
+  /// Set when the booking carried an Idempotency-Key; links the tickets to that request so a replay can return them.
+  bookingRequestId String?         @db.Char(36)
+  event            Event           @relation(fields: [eventId], references: [id])
+  user             User            @relation(fields: [userId], references: [id])
+  bookingRequest   BookingRequest? @relation(fields: [bookingRequestId], references: [id])
 
   @@index([userId])
   @@index([eventId])
+  @@index([bookingRequestId])
+}
+
+/// One row per successful booking that carried an Idempotency-Key. The app resends a queued booking after a lost
+/// connection with the same key; the unique (userId, idempotencyKey) pair makes the resend return the original
+/// tickets instead of booking twice. Rows only exist for bookings that committed: a refused booking rolls back.
+model BookingRequest {
+  id             String   @id @default(uuid()) @db.Char(36)
+  userId         String   @db.Char(36)
+  idempotencyKey String   @db.Char(36)
+  eventId        String   @db.Char(36)
+  quantity       Int
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id])
+  tickets        Ticket[]
+
+  @@unique([userId, idempotencyKey])
 }
