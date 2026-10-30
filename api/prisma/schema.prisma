@@ -1,0 +1,13 @@
+// Models arrive in step 2. Step 1 only proves the client generates and loads under tsx, ts-jest and Vercel.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  // CJS + bare imports: one output that tsx, ts-jest and Vercel's Node build all load without ESM config.
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "mysql"
+}

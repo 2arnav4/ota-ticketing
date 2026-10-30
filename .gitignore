@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.vercel/
+# Prisma 7 generates the client into src/; rebuilt by `prisma generate`
+api/src/generated/
+.DS_Store
+*.log

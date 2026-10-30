@@ -1,0 +1,9 @@
+{
+  // Jest's VM can't run native import() without --experimental-vm-modules, and the Prisma client uses import()
+  // to load its query compiler. CommonJS output turns those into require(). Runtime (tsx, Vercel) keeps nodenext.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node10"
+  }
+}
