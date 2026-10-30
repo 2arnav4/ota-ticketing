@@ -112,7 +112,7 @@ All routes except `/health` need `X-User-Id: <seeded user UUID>`. Errors always 
 |---|---|---|
 | `GET /health` | DB reachability | 200, 503 |
 | `GET /events` | Upcoming events: venue, date, price (paise), tickets left | 200, 400, 401 |
-| `POST /events/:id/book` `{ "quantity": 1-4 }` | Books tickets, never oversells | 201, 400, 404, 409, 429 |
+| `POST /events/:id/book` `{ "quantity": 1-4 }` | Books tickets, never oversells. Optional `Idempotency-Key: <uuid>` header: a resend with the same key returns the original tickets (`Idempotent-Replayed: true`) instead of booking again | 201, 400, 404, 409, 422 (key reused for a different booking), 429 |
 | `GET /me` | Current demo user and role | 200 |
 | `GET /me/tickets` | My tickets with event details and check-in status | 200 |
 | `POST /checkins` `{ "code": "..." }` | Staff only. Checks a ticket in once | 200, 403, 404, 409 (+ original time), 429 |
@@ -165,6 +165,12 @@ on a 2-left event → exactly 2 succeed; 5 parallel scans of one code → exactl
 
 ## Design notes
 
+- **Bookings made offline are queued, never faked.** With no connection, the app saves the booking on the device
+  and shows it as *Pending · will book when you're back online*; it is sent automatically on reconnect (even after
+  the app was closed) and a banner reports the result, including "sold out while you were offline". Each tap
+  carries one `Idempotency-Key`, so a retry after a lost reply returns the same tickets and can't book twice. The
+  resend still goes through the same guarded `UPDATE`, so the offline queue can't oversell either. The last loaded
+  events and tickets stay viewable offline (QR codes included).
 - **Money** is integer paise (₹349 = `34900`), formatted only at the edge with `Intl.NumberFormat('en-IN')`.
 - **Times** are stored in UTC and shown in IST (`Asia/Kolkata`) in both languages.
 - **Ticket codes** are 12 Crockford base32 characters from the CSPRNG (60 bits): unguessable, and no I/L/O/U, so
