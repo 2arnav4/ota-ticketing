@@ -1,5 +1,3 @@
-// Models arrive in step 2. Step 1 only proves the client generates and loads under tsx, ts-jest and Vercel.
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +8,50 @@ generator client {
 
 datasource db {
   provider = "mysql"
+}
+
+enum Role {
+  FAN
+  STAFF
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Char(36)
+  name      String   @db.VarChar(80)
+  role      Role     @default(FAN)
+  createdAt DateTime @default(now())
+  tickets   Ticket[]
+}
+
+model Event {
+  id          String   @id @default(uuid()) @db.Char(36)
+  name        String   @db.VarChar(120)
+  venue       String   @db.VarChar(160)
+  city        String   @db.VarChar(60)
+  /// Stored in UTC; clients render it in Asia/Kolkata.
+  startsAt    DateTime
+  /// INR in paise (₹349 = 34900). Integers only, never floats.
+  pricePaise  Int
+  capacity    Int
+  /// Guarded by CHECK (ticketsLeft >= 0) in the tickets_left_check migration; Prisma can't express CHECK.
+  ticketsLeft Int
+  createdAt   DateTime @default(now())
+  tickets     Ticket[]
+
+  @@index([startsAt])
+}
+
+model Ticket {
+  id          String    @id @default(uuid()) @db.Char(36)
+  /// 12 chars of Crockford base32; unique so a scanned code maps to exactly one ticket.
+  code        String    @unique @db.Char(12)
+  eventId     String    @db.Char(36)
+  userId      String    @db.Char(36)
+  checkedInAt DateTime?
+  createdAt   DateTime  @default(now())
+  event       Event     @relation(fields: [eventId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([eventId])
 }
