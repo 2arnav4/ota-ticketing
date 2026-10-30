@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import type { Ticket } from "@/api/types";
@@ -7,6 +8,7 @@ import { formatDateAndTime, formatEventDateTime, formatTicketCode, formatTime } 
 const QR_SIZE = 220;
 
 export function TicketCard({ ticket }: { ticket: Ticket }) {
+  const { t, i18n } = useTranslation();
   const used = ticket.checkedInAt !== null;
 
   return (
@@ -14,30 +16,30 @@ export function TicketCard({ ticket }: { ticket: Ticket }) {
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={styles.name}>{ticket.event.name}</Text>
-          <Text style={styles.meta}>{formatEventDateTime(ticket.event.startsAt)} IST</Text>
+          <Text style={styles.meta}>{formatEventDateTime(ticket.event.startsAt, i18n.language)} {t("events.ist")}</Text>
           <Text style={styles.meta}>
             {ticket.event.venue}, {ticket.event.city}
           </Text>
         </View>
         {used ? (
           <View style={[styles.badge, styles.badgeUsed]}>
-            <Text style={[styles.badgeText, { color: colors.success }]}>Checked in · {formatTime(ticket.checkedInAt!)}</Text>
+            <Text style={[styles.badgeText, { color: colors.success }]}>{t("tickets.checkedIn", { time: formatTime(ticket.checkedInAt!, i18n.language) })}</Text>
           </View>
         ) : (
           <View style={[styles.badge, styles.badgeUnused]}>
-            <Text style={[styles.badgeText, { color: colors.textMuted }]}>Not used</Text>
+            <Text style={[styles.badgeText, { color: colors.textMuted }]}>{t("tickets.notUsed")}</Text>
           </View>
         )}
       </View>
 
       {/* The QR holds only the 12-character code: no user or event data, nothing to tamper with. */}
-      <View style={[styles.qrWrap, used && styles.qrUsed]} accessibilityLabel={`QR code for ticket ${ticket.code}`}>
+      <View style={[styles.qrWrap, used && styles.qrUsed]} accessibilityLabel={t("tickets.qrLabel", { code: ticket.code })}>
         <QRCode value={ticket.code} size={QR_SIZE} backgroundColor="#FFFFFF" color="#111827" ecl="M" />
       </View>
       <Text style={styles.code} selectable>
         {formatTicketCode(ticket.code)}
       </Text>
-      {used ? <Text style={styles.usedNote}>Used on {formatDateAndTime(ticket.checkedInAt!)}</Text> : null}
+      {used ? <Text style={styles.usedNote}>{t("tickets.usedOn", { when: formatDateAndTime(ticket.checkedInAt!, i18n.language) })}</Text> : null}
     </View>
   );
 }

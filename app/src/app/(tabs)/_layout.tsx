@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import { useMe } from "@/hooks/useMe";
@@ -9,6 +10,7 @@ function TabIcon({ name, focused, size }: { name: keyof typeof Ionicons.glyphMap
 }
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
   const { data: me } = useMe();
   // UI convenience only: hides the tab for fans. The server's role check (M3) is what actually blocks them.
   const isStaff = me?.role === "STAFF";
@@ -25,21 +27,21 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Events",
+          title: t("tabs.events"),
           tabBarIcon: ({ focused, size }) => <TabIcon name="calendar-outline" focused={focused} size={size} />,
         }}
       />
       <Tabs.Screen
         name="tickets"
         options={{
-          title: "My Tickets",
+          title: t("tabs.tickets"),
           tabBarIcon: ({ focused, size }) => <TabIcon name="ticket-outline" focused={focused} size={size} />,
         }}
       />
       <Tabs.Screen
         name="scan"
         options={{
-          title: "Scan",
+          title: t("tabs.scan"),
           href: isStaff ? undefined : null,
           tabBarIcon: ({ focused, size }) => <TabIcon name="qr-code-outline" focused={focused} size={size} />,
         }}

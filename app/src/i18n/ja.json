@@ -1,0 +1,80 @@
+{
+  "tabs": {
+    "events": "イベント",
+    "tickets": "マイチケット",
+    "scan": "スキャン"
+  },
+  "user": {
+    "staffSuffix": "・スタッフ"
+  },
+  "language": {
+    "en": "EN",
+    "ja": "日本語",
+    "switch": "言語を切り替える"
+  },
+  "events": {
+    "soldOut": "完売",
+    "onlyLeft": "残り{{n}}枚",
+    "left": "残り{{n}}枚",
+    "ist": "IST",
+    "total": "合計",
+    "bookNow": "予約する",
+    "fewer": "枚数を減らす",
+    "more": "枚数を増やす",
+    "ticketsCount": "{{count}}枚"
+  },
+  "booking": {
+    "notEnough": "残りは{{count}}枚です。枚数を減らしてもう一度お試しください。",
+    "soldOut": "たった今完売しました。",
+    "started": "このイベントはすでに始まっています。",
+    "rateLimited": "試行回数が多すぎます。1分ほど待ってからお試しください。",
+    "failed": "予約できませんでした。もう一度お試しください。"
+  },
+  "tickets": {
+    "booked_one": "チケットを1枚予約しました",
+    "booked_other": "チケットを{{count}}枚予約しました",
+    "checkedIn": "入場済み・{{time}}",
+    "notUsed": "未使用",
+    "usedOn": "{{when}}に使用",
+    "qrLabel": "チケット{{code}}のQRコード",
+    "emptyTitle": "チケットはまだありません",
+    "emptyMessage": "イベントを予約すると、ここにQRチケットが表示されます。",
+    "browse": "イベントを見る"
+  },
+  "scan": {
+    "staffOnlyNotice": "スキャンは入場スタッフ専用です。上でGate Staffに切り替えてください。",
+    "allowPrompt": "チケットのQRコードを読み取るため、カメラへのアクセスを許可してください。",
+    "cameraBlocked": "カメラへのアクセスがオフです。設定で有効にするか、下にコードを入力してください。",
+    "allowButton": "カメラを許可",
+    "checking": "確認中…",
+    "typeCode": "またはコードを入力",
+    "codeLabel": "チケットコード",
+    "checkIn": "入場処理",
+    "next": "次をスキャン",
+    "result": {
+      "checkedIn": "入場OK",
+      "already": "入場済みです",
+      "alreadyAt": "初回スキャン：{{when}} IST",
+      "doNotAdmit": "再入場させないでください。",
+      "unknown": "不明なチケット",
+      "unknownLine": "このコードのチケットはありません。",
+      "invalid": "チケットコードではありません",
+      "invalidLine": "このQRはŌtaのチケットではありません。",
+      "staffOnly": "スタッフ専用",
+      "staffOnlyLine": "入場処理にはGate Staffに切り替えてください。",
+      "offline": "接続できません",
+      "failed": "入場処理に失敗しました",
+      "tryAgain": "もう一度お試しください。"
+    }
+  },
+  "errors": {
+    "title": "読み込めませんでした",
+    "network": "サーバーに接続できません（{{url}}）",
+    "generic": "問題が発生しました。",
+    "retry": "再試行",
+    "loading": "読み込み中"
+  },
+  "banner": {
+    "dismiss": "閉じる"
+  }
+}

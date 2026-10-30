@@ -1,21 +1,26 @@
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ApiError, NetworkError } from "@/api/client";
 import { colors, radius, space, type } from "@/theme/tokens";
 
-function describe(error: unknown): string {
-  if (error instanceof NetworkError || error instanceof ApiError) {
-    return error.message;
-  }
-  return "Something went wrong.";
+function useDescribe(): (error: unknown) => string {
+  const { t } = useTranslation();
+  return (error) => {
+    if (error instanceof NetworkError) return t("errors.network", { url: error.url });
+    if (error instanceof ApiError) return error.message;
+    return t("errors.generic");
+  };
 }
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry: () => void }) {
+  const { t } = useTranslation();
+  const describe = useDescribe();
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{"Couldn't load this"}</Text>
+      <Text style={styles.title}>{t("errors.title")}</Text>
       <Text style={styles.message}>{describe(error)}</Text>
       <Pressable accessibilityRole="button" onPress={onRetry} style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}>
-        <Text style={styles.buttonText}>Retry</Text>
+        <Text style={styles.buttonText}>{t("errors.retry")}</Text>
       </Pressable>
     </View>
   );

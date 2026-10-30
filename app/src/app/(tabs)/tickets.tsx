@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { router, useLocalSearchParams } from "expo-router";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -11,20 +12,21 @@ import { useTickets } from "@/hooks/useTickets";
 import { colors, space } from "@/theme/tokens";
 
 export default function TicketsScreen() {
+  const { t, i18n } = useTranslation();
   const { data: tickets, isPending, isError, error, refetch, isRefetching } = useTickets();
   // Set by the Events screen after a successful booking; cleared when the banner is dismissed.
   const { booked } = useLocalSearchParams<{ booked?: string }>();
 
   const banner = booked ? (
     <Banner
-      message={booked === "1" ? "Booked 1 ticket" : `Booked ${booked} tickets`}
+      message={t("tickets.booked", { count: Number(booked) })}
       onDismiss={() => router.setParams({ booked: undefined })}
     />
   ) : undefined;
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <AppHeader title="My Tickets" />
+      <AppHeader title={t("tabs.tickets")} />
       {isPending ? (
         <View style={styles.list}>
           <EventCardSkeleton />
@@ -37,15 +39,17 @@ export default function TicketsScreen() {
       ) : (
         <FlatList
           data={tickets}
+          // FlatList skips re-rendering rows unless data or extraData change; the language must count.
+          extraData={i18n.language}
           keyExtractor={(ticket) => ticket.id}
           renderItem={({ item }) => <TicketCard ticket={item} />}
           contentContainerStyle={styles.list}
           ListHeaderComponent={banner}
           ListEmptyComponent={
             <EmptyState
-              title="No tickets yet"
-              message="Book an event and your QR tickets show up here."
-              actionLabel="Browse events"
+              title={t("tickets.emptyTitle")}
+              message={t("tickets.emptyMessage")}
+              actionLabel={t("tickets.browse")}
               onAction={() => router.navigate("/")}
             />
           }

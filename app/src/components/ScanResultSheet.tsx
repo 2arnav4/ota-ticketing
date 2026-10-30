@@ -1,3 +1,5 @@
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ApiError, NetworkError } from "@/api/client";
 import type { CheckedInTicket } from "@/api/types";
@@ -8,26 +10,26 @@ type Props = { ticket?: CheckedInTicket; error?: unknown; onNext: () => void };
 
 type ResultView = { tone: "success" | "warning" | "danger"; title: string; lines: string[] };
 
-function describe({ ticket, error }: Pick<Props, "ticket" | "error">): ResultView {
+function describe({ ticket, error }: Pick<Props, "ticket" | "error">, t: TFunction, language: string): ResultView {
   if (ticket) {
     return {
       tone: "success",
-      title: "Checked in",
+      title: t("scan.result.checkedIn"),
       lines: [ticket.holderName, ticket.event.name, formatTicketCode(ticket.code)],
     };
   }
   if (error instanceof ApiError) {
     if (error.code === "ALREADY_CHECKED_IN") {
-      const at = typeof error.details.checkedInAt === "string" ? formatDateAndTime(error.details.checkedInAt) : "";
-      return { tone: "warning", title: "Already checked in", lines: [`First scanned ${at} IST`, "Do not admit again."] };
+      const at = typeof error.details.checkedInAt === "string" ? formatDateAndTime(error.details.checkedInAt, language) : "";
+      return { tone: "warning", title: t("scan.result.already"), lines: [t("scan.result.alreadyAt", { when: at }), t("scan.result.doNotAdmit")] };
     }
-    if (error.code === "TICKET_NOT_FOUND") return { tone: "danger", title: "Unknown ticket", lines: ["No ticket has this code."] };
-    if (error.code === "VALIDATION_FAILED") return { tone: "danger", title: "Not a ticket code", lines: ["This QR isn't an Ōta ticket."] };
-    if (error.code === "FORBIDDEN") return { tone: "danger", title: "Staff only", lines: ["Switch to Gate Staff to check tickets in."] };
-    return { tone: "danger", title: "Check-in failed", lines: [error.message] };
+    if (error.code === "TICKET_NOT_FOUND") return { tone: "danger", title: t("scan.result.unknown"), lines: [t("scan.result.unknownLine")] };
+    if (error.code === "VALIDATION_FAILED") return { tone: "danger", title: t("scan.result.invalid"), lines: [t("scan.result.invalidLine")] };
+    if (error.code === "FORBIDDEN") return { tone: "danger", title: t("scan.result.staffOnly"), lines: [t("scan.result.staffOnlyLine")] };
+    return { tone: "danger", title: t("scan.result.failed"), lines: [error.message] };
   }
-  if (error instanceof NetworkError) return { tone: "danger", title: "No connection", lines: [error.message] };
-  return { tone: "danger", title: "Check-in failed", lines: ["Try again."] };
+  if (error instanceof NetworkError) return { tone: "danger", title: t("scan.result.offline"), lines: [t("errors.network", { url: error.url })] };
+  return { tone: "danger", title: t("scan.result.failed"), lines: [t("scan.result.tryAgain")] };
 }
 
 const TONES = {
@@ -37,7 +39,8 @@ const TONES = {
 } as const;
 
 export function ScanResultSheet({ ticket, error, onNext }: Props) {
-  const view = describe({ ticket, error });
+  const { t, i18n } = useTranslation();
+  const view = describe({ ticket, error }, t, i18n.language);
   const tone = TONES[view.tone];
 
   return (
@@ -51,7 +54,7 @@ export function ScanResultSheet({ ticket, error, onNext }: Props) {
         </Text>
       ))}
       <Pressable accessibilityRole="button" onPress={onNext} style={({ pressed }) => [styles.next, pressed && { opacity: 0.8 }]}>
-        <Text style={styles.nextText}>Scan next</Text>
+        <Text style={styles.nextText}>{t("scan.next")}</Text>
       </Pressable>
     </View>
   );
