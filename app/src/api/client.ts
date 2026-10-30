@@ -28,9 +28,13 @@ type RequestOptions = {
   method?: "GET" | "POST";
   body?: unknown;
   signal?: AbortSignal;
+  headers?: Record<string, string>;
 };
 
-export async function apiRequest<T>(path: string, { userId, method = "GET", body, signal }: RequestOptions): Promise<T> {
+export async function apiRequest<T>(
+  path: string,
+  { userId, method = "GET", body, signal, headers: extraHeaders }: RequestOptions,
+): Promise<T> {
   // Own controller so a hung server times out; also follows React Query's signal when a query is cancelled.
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -42,6 +46,7 @@ export async function apiRequest<T>(path: string, { userId, method = "GET", body
       method,
       signal: controller.signal,
       headers: {
+        ...extraHeaders,
         "X-User-Id": userId,
         ...(body === undefined ? {} : { "Content-Type": "application/json" }),
       },
