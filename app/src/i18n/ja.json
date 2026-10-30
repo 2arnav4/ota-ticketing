@@ -31,8 +31,6 @@
     "failed": "予約できませんでした。もう一度お試しください。"
   },
   "tickets": {
-    "booked_one": "チケットを1枚予約しました",
-    "booked_other": "チケットを{{count}}枚予約しました",
     "checkedIn": "入場済み・{{time}}",
     "notUsed": "未使用",
     "usedOn": "{{when}}に使用",
@@ -77,5 +75,22 @@
   },
   "banner": {
     "dismiss": "閉じる"
+  },
+  "offline": {
+    "banner": "オフラインです。保存済みのデータを表示中。予約はオンラインに戻ったときに送信されます。",
+    "noDataTitle": "オフラインです",
+    "noDataMessage": "初めて読み込むにはインターネットに接続してください。"
+  },
+  "pending": {
+    "title": "保留中",
+    "waiting_other": "{{count}}枚・オンラインに戻ったら予約します",
+    "sending_other": "{{count}}枚を予約中…"
+  },
+  "notice": {
+    "booked_other": "{{event}}のチケットを{{count}}枚予約しました",
+    "soldOut": "{{event}}を予約できませんでした：オフライン中に完売しました。",
+    "notEnough": "{{event}}を予約できませんでした：残りは{{count}}枚です。",
+    "started": "{{event}}を予約できませんでした：イベントはすでに始まっています。",
+    "failed": "{{event}}を予約できませんでした。もう一度お試しください。"
   }
 }

@@ -31,8 +31,6 @@
     "failed": "Booking failed. Try again."
   },
   "tickets": {
-    "booked_one": "Booked 1 ticket",
-    "booked_other": "Booked {{count}} tickets",
     "checkedIn": "Checked in · {{time}}",
     "notUsed": "Not used",
     "usedOn": "Used on {{when}}",
@@ -77,5 +75,25 @@
   },
   "banner": {
     "dismiss": "Dismiss"
+  },
+  "offline": {
+    "banner": "You're offline. Showing saved data; bookings will be sent when you're back online.",
+    "noDataTitle": "You're offline",
+    "noDataMessage": "Connect to the internet to load this for the first time."
+  },
+  "pending": {
+    "title": "Pending",
+    "waiting_one": "1 ticket · will book when you're back online",
+    "waiting_other": "{{count}} tickets · will book when you're back online",
+    "sending_one": "Booking 1 ticket…",
+    "sending_other": "Booking {{count}} tickets…"
+  },
+  "notice": {
+    "booked_one": "Booked 1 ticket for {{event}}",
+    "booked_other": "Booked {{count}} tickets for {{event}}",
+    "soldOut": "Couldn't book {{event}}: it sold out while you were offline.",
+    "notEnough": "Couldn't book {{event}}: only {{count}} left now.",
+    "started": "Couldn't book {{event}}: the event has started.",
+    "failed": "Couldn't book {{event}}. Please try again."
   }
 }

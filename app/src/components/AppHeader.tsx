@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colors, layout, space, type } from "@/theme/tokens";
 import { LanguagePill } from "./LanguagePill";
+import { NoticeHost } from "./NoticeHost";
+import { OfflineBanner } from "./OfflineBanner";
 import { UserSwitcher } from "./UserSwitcher";
 
 export function AppHeader({ title }: { title: string }) {
@@ -15,6 +17,8 @@ export function AppHeader({ title }: { title: string }) {
         <LanguagePill />
       </View>
       <UserSwitcher />
+      <OfflineBanner />
+      <NoticeHost />
     </View>
   );
 }

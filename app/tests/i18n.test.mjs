@@ -13,9 +13,15 @@ function flatten(obj, prefix = "") {
 const en = new Map(flatten(load("en")));
 const ja = new Map(flatten(load("ja")));
 
+// i18next plural keys: English has `_one` and `_other`, Japanese has only `_other` (CLDR: no grammatical plural).
+// Compare plural families by their base name, so "pending.waiting_one" is satisfied by "pending.waiting_other".
+const PLURAL = /_(zero|one|two|few|many|other)$/;
+const base = (key) => key.replace(PLURAL, "");
+const lookup = (map, key) => map.get(key) ?? map.get(`${base(key)}_other`) ?? map.get(base(key));
+
 test("every English key has a Japanese translation and vice versa", () => {
-  assert.deepEqual([...en.keys()].filter((k) => !ja.has(k)), []);
-  assert.deepEqual([...ja.keys()].filter((k) => !en.has(k)), []);
+  assert.deepEqual([...en.keys()].filter((k) => lookup(ja, k) === undefined), []);
+  assert.deepEqual([...ja.keys()].filter((k) => lookup(en, k) === undefined), []);
 });
 
 test("no translation is empty", () => {
@@ -23,6 +29,10 @@ test("no translation is empty", () => {
 });
 
 test("placeholders match between languages", () => {
-  const vars = (s) => [...String(s).matchAll(/{{(\w+)}}/g)].map((m) => m[1]).sort();
-  for (const [key, value] of en) assert.deepEqual(vars(ja.get(key)), vars(value), key);
+  // {{count}} may be spelled out in a singular form ("1 ticket"), so it's ignored for plural keys.
+  const vars = (s, plural) => [...String(s).matchAll(/{{(\w+)}}/g)].map((m) => m[1]).filter((v) => !(plural && v === "count")).sort();
+  for (const [key, value] of en) {
+    const plural = PLURAL.test(key);
+    assert.deepEqual(vars(lookup(ja, key), plural), vars(value, plural), key);
+  }
 });
