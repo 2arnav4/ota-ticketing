@@ -8,7 +8,7 @@ import { prisma } from "../src/db/prisma";
 const app = createApp();
 const rohan = SEED_USERS.rohan.id;
 
-function book(eventId: string, body: unknown, userId = rohan) {
+function book(eventId: string, body: unknown, userId: string = rohan) {
   return request(app).post(`/events/${eventId}/book`).set("X-User-Id", userId).send(body as object);
 }
 
