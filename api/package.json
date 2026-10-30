@@ -11,7 +11,10 @@
     "build": "prisma generate && tsc --noEmit",
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "7.10.1",

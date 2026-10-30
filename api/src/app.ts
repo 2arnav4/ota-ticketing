@@ -6,7 +6,9 @@ import { pinoHttp } from "pino-http";
 import { env } from "./config/env";
 import { corsMiddleware } from "./middleware/cors";
 import { errorHandler, notFound } from "./middleware/errorHandler";
+import { eventsRouter } from "./routes/events";
 import { healthRouter } from "./routes/health";
+import { meRouter } from "./routes/me";
 
 export const logger = pino({ level: env.LOG_LEVEL });
 
@@ -32,6 +34,8 @@ export function createApp(): express.Express {
   app.use(express.json({ limit: "10kb" }));
 
   app.use("/health", healthRouter);
+  app.use("/events", eventsRouter);
+  app.use("/me", meRouter);
 
   app.use(notFound);
   app.use(errorHandler);
