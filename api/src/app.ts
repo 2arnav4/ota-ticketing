@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
 import express from "express";
 import helmet from "helmet";
-import { pino } from "pino";
+import type { Logger } from "pino";
 import { pinoHttp } from "pino-http";
 import { env } from "./config/env";
 import { corsMiddleware } from "./middleware/cors";
+import { logger as defaultLogger } from "./logging/logger";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { writeRateLimit } from "./middleware/rateLimit";
 import { checkinsRouter } from "./routes/checkins";
@@ -13,15 +14,20 @@ import { healthRouter } from "./routes/health";
 import { internalRouter } from "./routes/internal";
 import { meRouter } from "./routes/me";
 
-export const logger = pino({ level: env.LOG_LEVEL });
+export { defaultLogger as logger };
 
-type AppOptions = { writesPerMinute?: number };
+type AppOptions = { writesPerMinute?: number; logger?: Logger };
 
-export function createApp({ writesPerMinute = env.RATE_LIMIT_PER_MINUTE }: AppOptions = {}): express.Express {
+export function createApp({
+  writesPerMinute = env.RATE_LIMIT_PER_MINUTE,
+  logger = defaultLogger,
+}: AppOptions = {}): express.Express {
   const app = express();
 
-  // Vercel puts exactly one proxy in front; trust its X-Forwarded-For so req.ip (and the rate limiter) sees the client.
-  app.set("trust proxy", 1);
+  // On Vercel exactly one proxy sits in front and it overwrites X-Forwarded-For, so trusting one hop gives the
+  // real client IP. Anywhere else nothing rewrites that header: trusting it would let a client pick its own IP
+  // and get a fresh rate-limit bucket per request (Gauntlet F-3). So trust it only on Vercel.
+  app.set("trust proxy", process.env.VERCEL ? 1 : false);
   app.disable("x-powered-by");
 
   app.use(
