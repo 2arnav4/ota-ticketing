@@ -7,7 +7,19 @@ Express + MySQL API, Expo (React Native) app for iOS, Android and web.
 |---|---|
 | Live web app | **https://ota-ticketing.vercel.app** (phone or desktop browser) |
 | Live API | **https://ota-ticketing-api.vercel.app** (`/health` shows DB status) |
+| Demo video | **https://www.loom.com/share/e96e1bd91b034dfaab33f0812152640a** (booking a ticket, the QR, gate check-in) |
 | Stack | Node 24, Express 5, Prisma 7, MySQL 8 · Expo SDK 58, Expo Router, React Query, i18next |
+
+## On a phone
+
+The live site on an iPhone (Safari). Gate Staff scans a fan's QR from another screen: the first scan checks the
+ticket in, and a second scan of the same QR is refused with the time of the first check-in.
+
+<p>
+  <img src="screenshots/iphone-checked-in.jpeg" width="260" alt="Scan screen on an iPhone: green Checked in, Rohan Mehta, Ōta TOKYO Delhi: Day 1, code BTWY-MSFW-VBB0" />
+  &nbsp;&nbsp;
+  <img src="screenshots/iphone-already-checked-in.jpeg" width="260" alt="The same QR scanned again: amber Already checked in, first scanned 30 Oct 2026 · 9:04 PM IST, do not admit again" />
+</p>
 
 ## Test the live site (reviewers)
 
