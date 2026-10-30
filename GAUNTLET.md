@@ -82,6 +82,36 @@ deeply nested JSON → 400 without a crash, CORS from other origins and `Origin:
 without or with a wrong secret → 401 (constant-time compare; 404 when unset), wrong methods and `../` paths → 404,
 error bodies never contain stack traces, SQL or Prisma messages, helmet headers present, `x-powered-by` off.
 
+## Re-run 2 (after deploy, current `dev`)
+
+Everything re-run on the code that is live, local and test databases only. Findings are reported, not fixed.
+
+| Pass | Result |
+|---|---|
+| API tests + typecheck | **86 / 86 pass** |
+| App tests + typecheck + lint | **11 / 11 pass**, clean |
+| Feature checklist, headless Chrome | **14 / 14** at 390×844 and **14 / 14** at 1440×900 |
+| `npm run race` (20 × 1 on 2 left) | 2 booked, 18 × 409, stock 2 → 0, PASS |
+| `npm run race -- --event cosplay --quantity 3` | 6 booked, 14 × 409, stock 18 → 0, PASS |
+| Two browsers, same user, last ticket | One 201 ("Booked 1 ticket"), one 409 ("Just sold out."); stock 0 |
+| Load, 200 connections (quiet machine) | 0 socket errors, 0 × 5xx; reads p99 108 ms; storm 2 / 1,000 booked; 1 / 1,000 check-ins |
+| Load, 1,000 connections | 3.1 % / 40.4 % / 7.9 % / 36.4 % socket errors (macOS accept queue, as before); invariants hold, 0 × 5xx |
+| Live site (read-only) | 12 / 12 at phone and desktop size; `/health` up; CORS allows only the web origin |
+| Security review (fresh agent, all code + git history) | 0 critical, 0 high new. 1 medium, 1 low, 2 info (below) |
+| Dependencies (`npm audit --omit=dev`) | API: 0. App: 1 high in Expo's build tooling only (G2-2) |
+
+| ID | Severity | Finding | Evidence | Status |
+|---|---|---|---|---|
+| G2-1 | Medium | Booking and check-in logs write full ticket codes and buyer / holder names. A code is what gets someone through the gate, so log access = usable tickets. The F-2 redaction only covers headers | 28 log lines with codes, 3 with names, in one review run | **Open** (suggested: log the last 4 characters and the ticket id, no names) |
+| G2-2 | Low | `zod` 3.25.76 (memory-exhaustion advisory) inside Expo's CLI / config tooling | `npm audit`; not imported anywhere in `app/src`; the API uses patched zod 4.6.7 | Accepted: build tooling, not a runtime trust boundary |
+| G2-3 | Info | Check-in status codes differ (404 / 400 / 409) | Same as F-5 | Accepted |
+| G2-4 | Info | `CORS_ORIGINS` empty by default | Fails closed; production value verified set | No action |
+
+Held again: privilege escalation (fan → 403), mass assignment, quantity type confusion (incl. `9007199254740993`),
+prototype pollution, oversized / non-JSON bodies, SQL injection, CORS (`evil.com`, `null`), cron secret (401,
+constant-time), method confusion, path traversal, error bodies, helmet headers, `X-User-Id` redacted in logs,
+race / load scripts locked to localhost, no secrets anywhere in git history.
+
 ## How to re-run the load test
 
 ```bash
