@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     padding: space.lg,
   },
   row: { flexDirection: "row", gap: space.md },
-  chip: { width: 52, height: 56, borderRadius: 10, backgroundColor: colors.chipIdle },
+  chip: { width: 52, height: 56, borderRadius: 10, backgroundColor: colors.neutralFill },
   lines: { flex: 1, gap: space.sm, justifyContent: "center" },
-  line: { height: 12, borderRadius: 6, backgroundColor: colors.chipIdle },
+  line: { height: 12, borderRadius: 6, backgroundColor: colors.neutralFill },
 });

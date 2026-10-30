@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: space.sm,
-    backgroundColor: colors.textPrimary,
+    backgroundColor: colors.ink,
     borderRadius: radius.card,
     paddingHorizontal: space.md,
     paddingVertical: space.sm + 2,

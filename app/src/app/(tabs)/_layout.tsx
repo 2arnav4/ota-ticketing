@@ -6,7 +6,7 @@ import { colors } from "@/theme/tokens";
 
 // Picks the color from `focused` itself: the navigator's color param is typed wider than Ionicons accepts.
 function TabIcon({ name, focused, size }: { name: keyof typeof Ionicons.glyphMap; focused: boolean; size: number }) {
-  return <Ionicons name={name} size={size} color={focused ? colors.gradientEnd : colors.textMuted} />;
+  return <Ionicons name={name} size={size} color={focused ? colors.ink : colors.muted} />;
 }
 
 export default function TabsLayout() {
@@ -19,8 +19,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.gradientEnd,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: colors.ink,
+        tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
       }}
     >

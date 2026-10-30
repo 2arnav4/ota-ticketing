@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { LANGUAGES, setLanguage, type Language } from "@/i18n";
 import { colors, radius, space } from "@/theme/tokens";
 
@@ -27,9 +27,9 @@ export function LanguagePill() {
 }
 
 const styles = StyleSheet.create({
-  pill: { flexDirection: "row", backgroundColor: colors.chipIdle, borderRadius: radius.pill, padding: 3 },
-  option: { paddingHorizontal: space.md, paddingVertical: space.xs, borderRadius: radius.pill },
-  optionActive: { backgroundColor: colors.chipActive },
-  text: { fontSize: 12, fontWeight: "600", color: colors.textMuted },
-  textActive: { color: colors.textPrimary },
+  pill: { flexDirection: "row", backgroundColor: colors.neutralFill, borderRadius: radius.pill, padding: 3 },
+  option: { minHeight: 32, justifyContent: "center", paddingHorizontal: space.md, borderRadius: radius.pill },
+  optionActive: { backgroundColor: colors.surface },
+  text: { fontSize: 13, fontWeight: "600", color: colors.muted },
+  textActive: { color: colors.ink },
 });

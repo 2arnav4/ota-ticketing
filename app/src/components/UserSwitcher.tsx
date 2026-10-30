@@ -2,9 +2,10 @@ import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { DEMO_USERS } from "@/config/demoUsers";
 import { useSession } from "@/state/session";
-import { colors, radius, space } from "@/theme/tokens";
+import { colors, radius, space, touch } from "@/theme/tokens";
 
 // Stand-in for login (out of scope per the brief): picks which seeded user's ID goes in X-User-Id.
+// The selected chip is ink on neutral, not the accent: choosing a demo user is chrome, not data.
 export function UserSwitcher() {
   const { userId, setUserId } = useSession();
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export function UserSwitcher() {
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             onPress={() => setUserId(user.id)}
-            style={[styles.chip, active && styles.chipActive]}
+            style={({ hovered }) => [styles.chip, active ? styles.chipActive : hovered && styles.chipHover]}
           >
             <Text style={[styles.text, active && styles.textActive]}>
               {user.name}
@@ -35,14 +36,16 @@ export function UserSwitcher() {
 const styles = StyleSheet.create({
   row: { gap: space.sm },
   chip: {
-    backgroundColor: colors.chipIdle,
+    minHeight: touch.min - 8,
+    justifyContent: "center",
     borderRadius: radius.pill,
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm - 2,
+    paddingHorizontal: space.md + 2,
     borderWidth: 1,
-    borderColor: "transparent",
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
   },
-  chipActive: { backgroundColor: colors.chipActive, borderColor: colors.gradientStart },
-  text: { fontSize: 13, color: colors.textMuted, fontWeight: "500" },
-  textActive: { color: colors.textPrimary, fontWeight: "600" },
+  chipHover: { backgroundColor: colors.neutralFill },
+  chipActive: { backgroundColor: colors.ink, borderColor: colors.ink },
+  text: { fontSize: 14, color: colors.ink, fontWeight: "500" },
+  textActive: { color: "#FFFFFF", fontWeight: "600" },
 });

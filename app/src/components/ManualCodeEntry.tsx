@@ -24,7 +24,7 @@ export function ManualCodeEntry({ disabled, onSubmit }: { disabled: boolean; onS
           onChangeText={setCode}
           onSubmitEditing={submit}
           placeholder="XXXX-XXXX-XXXX"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={colors.muted}
           autoCapitalize="characters"
           autoCorrect={false}
           maxLength={20}
@@ -47,24 +47,25 @@ export function ManualCodeEntry({ disabled, onSubmit }: { disabled: boolean; onS
 
 const styles = StyleSheet.create({
   wrap: { gap: space.sm },
-  label: { ...type.meta, color: colors.textMuted },
+  label: { ...type.meta, color: colors.muted },
   row: { flexDirection: "row", gap: space.sm },
   input: {
     flex: 1,
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderStrong,
     borderRadius: radius.card,
     paddingHorizontal: space.md,
-    paddingVertical: space.md,
+    minHeight: 48,
     fontSize: 16,
-    fontFamily: "monospace",
-    color: colors.textPrimary,
+    letterSpacing: 1,
+    color: colors.ink,
   },
   button: {
-    backgroundColor: colors.gradientEnd,
-    borderRadius: radius.card,
-    paddingHorizontal: space.lg,
+    backgroundColor: colors.ink,
+    minHeight: 48,
+    borderRadius: radius.pill,
+    paddingHorizontal: space.xl,
     justifyContent: "center",
   },
   buttonText: { color: "#FFFFFF", fontWeight: "700" },

@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.sm + 2,
     paddingVertical: 2,
   },
-  badgeText: { fontSize: 11, fontWeight: "700", color: colors.warning, textTransform: "uppercase", letterSpacing: 0.5 },
-  name: { ...type.cardTitle, color: colors.textPrimary },
-  meta: { ...type.meta, color: colors.textMuted },
+  badgeText: { fontSize: 12, fontWeight: "700", color: colors.warning },
+  name: { ...type.cardTitle, color: colors.ink },
+  meta: { ...type.meta, color: colors.muted },
 });

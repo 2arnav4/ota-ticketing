@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, radius, space } from "@/theme/tokens";
+import { colors, radius, touch, type } from "@/theme/tokens";
 
 type Props = { value: number; min: number; max: number; disabled?: boolean; onChange: (next: number) => void };
 
@@ -28,26 +28,33 @@ function StepButton(props: { label: string; accessibilityLabel: string; enabled:
       accessibilityState={{ disabled: !props.enabled }}
       disabled={!props.enabled}
       onPress={props.onPress}
-      style={({ pressed }) => [styles.button, !props.enabled && styles.disabled, pressed && { opacity: 0.6 }]}
+      style={({ pressed, hovered }) => [
+        styles.button,
+        !props.enabled && styles.disabled,
+        hovered && props.enabled && styles.hovered,
+        pressed && props.enabled && styles.pressed,
+      ]}
     >
-      <Text style={styles.buttonText}>{props.label}</Text>
+      <Text style={[styles.buttonText, !props.enabled && styles.disabledText]}>{props.label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", alignItems: "center", gap: space.md },
-  button: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+  // One rounded control rather than two floating circles: reads as a single "how many" field.
+  row: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surface,
   },
-  disabled: { opacity: 0.35 },
-  buttonText: { fontSize: 20, fontWeight: "600", color: colors.textPrimary, lineHeight: 22 },
-  value: { minWidth: 20, textAlign: "center", fontSize: 17, fontWeight: "700", color: colors.textPrimary },
+  button: { width: touch.min, height: touch.min, borderRadius: radius.pill, alignItems: "center", justifyContent: "center" },
+  hovered: { backgroundColor: colors.neutralFill },
+  pressed: { backgroundColor: colors.border },
+  disabled: { opacity: 1 },
+  buttonText: { fontSize: 20, fontWeight: "500", color: colors.ink, lineHeight: 22 },
+  disabledText: { color: colors.borderStrong },
+  value: { minWidth: 24, textAlign: "center", fontSize: 17, fontWeight: "700", color: colors.ink, ...type.figure },
 });

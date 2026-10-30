@@ -15,7 +15,7 @@ import { useSession } from "@/state/session";
 import { colors, radius, space, type } from "@/theme/tokens";
 import { classifyError, logForDevelopers } from "@/utils/errorKind";
 import { formatINR } from "@/utils/format";
-import { GradientButton } from "./GradientButton";
+import { PrimaryButton } from "./PrimaryButton";
 import { QuantityStepper } from "./QuantityStepper";
 
 const MAX_PER_BOOKING = 4;
@@ -69,7 +69,7 @@ export function BookingPanel({ event }: { event: EventSummary }) {
     return (
       <View style={styles.panel}>
         {inlineError ? <Text style={styles.error}>{inlineError}</Text> : null}
-        <GradientButton label={t("events.soldOut")} onPress={() => undefined} disabled />
+        <PrimaryButton label={t("events.soldOut")} onPress={() => undefined} disabled />
       </View>
     );
   }
@@ -95,26 +95,25 @@ export function BookingPanel({ event }: { event: EventSummary }) {
       </View>
       {inlineError ? <Text style={styles.error}>{inlineError}</Text> : null}
       {/* Disabled while pending stops double-tap double-booking in the UI. The server's guarded UPDATE is the real rule. */}
-      <GradientButton label={t("events.bookNow")} onPress={onBook} loading={book.isPending} />
+      <PrimaryButton label={t("events.bookNow")} onPress={onBook} loading={book.isPending} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  panel: { gap: space.md, paddingTop: space.md, borderTopWidth: 1, borderTopColor: colors.border },
+  // No rule above the booking row: space and the stepper's own outline do the separating.
+  panel: { gap: space.md },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   total: { alignItems: "flex-end" },
-  totalLabel: { ...type.meta, color: colors.textMuted },
-  totalValue: { fontSize: 18, fontWeight: "700", color: colors.price },
-  error: { ...type.meta, color: colors.danger, fontWeight: "600" },
+  totalLabel: { ...type.meta, color: colors.muted },
+  totalValue: { fontSize: 17, fontWeight: "700", color: colors.ink, ...type.figure },
+  error: { ...type.meta, fontSize: 14, color: colors.danger, fontWeight: "600" },
   pendingBox: {
-    borderTopWidth: 0,
-    marginTop: space.xs,
-    padding: space.md,
-    borderRadius: radius.card,
+    padding: space.md + 2,
+    borderRadius: radius.chip,
     backgroundColor: colors.warningTint,
     gap: 2,
   },
-  pendingTitle: { fontSize: 13, fontWeight: "700", color: colors.warning, textTransform: "uppercase", letterSpacing: 0.5 },
-  pendingText: { ...type.meta, fontSize: 14, color: colors.textPrimary },
+  pendingTitle: { fontSize: 14, fontWeight: "700", color: colors.warning },
+  pendingText: { ...type.meta, fontSize: 14, color: colors.ink },
 });

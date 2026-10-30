@@ -97,7 +97,7 @@ export default function ScanScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, backgroundColor: colors.ground },
   content: { padding: space.lg, gap: space.lg, width: "100%", maxWidth: layout.maxContentWidth, alignSelf: "center" },
   viewfinder: {
     aspectRatio: 1,
@@ -108,13 +108,13 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#0B1020",
     borderWidth: 3,
-    borderColor: colors.gradientStart,
+    borderColor: colors.accent,
   },
   cameraOff: { flex: 1, alignItems: "center", justifyContent: "center", padding: space.xl, gap: space.md },
   cameraOffText: { color: "#E5E7EB", textAlign: "center", ...type.meta, fontSize: 14 },
-  allow: { backgroundColor: colors.gradientStart, borderRadius: radius.pill, paddingHorizontal: space.xl, paddingVertical: space.sm },
-  allowText: { color: "#FFFFFF", fontWeight: "700" },
+  allow: { backgroundColor: "#FFFFFF", borderRadius: radius.pill, paddingHorizontal: space.xl, minHeight: 44, justifyContent: "center" },
+  allowText: { color: colors.ink, fontWeight: "700" },
   pending: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" },
   pendingText: { color: "#FFFFFF", fontWeight: "700", fontSize: 16 },
-  notice: { ...type.meta, color: colors.textMuted, textAlign: "center", padding: space.xl },
+  notice: { ...type.meta, color: colors.muted, textAlign: "center", padding: space.xl },
 });
