@@ -1,10 +1,12 @@
 import { Writable } from "node:stream";
 import request from "supertest";
-import { SEED_USERS } from "../prisma/seedData";
+import { seedDemoData } from "../prisma/seed";
+import { SEED_EVENTS, SEED_USERS } from "../prisma/seedData";
 import { createApp } from "../src/createApp";
 import { prisma } from "../src/db/prisma";
 import { createLogger } from "../src/logging/logger";
 
+beforeAll(() => seedDemoData(prisma));
 afterAll(() => prisma.$disconnect());
 
 // Gauntlet F-2: credentials in request headers must never reach the logs.
@@ -31,6 +33,36 @@ describe("request log redaction", () => {
     expect(output).not.toContain("super-secret-value-123456");
     expect(output).not.toContain(SEED_USERS.aiko.id);
     expect(output).toContain("[redacted]");
+  });
+});
+
+// Gauntlet G2-1: ticket codes are bearer credentials and names are personal data; neither belongs in logs.
+describe("booking and check-in logs", () => {
+  it("never contain a full ticket code or a person's name", async () => {
+    const lines: string[] = [];
+    const sink = new Writable({
+      write(chunk, _encoding, done) {
+        lines.push(chunk.toString());
+        done();
+      },
+    });
+    const logger = createLogger(sink);
+    logger.level = "info"; // setupEnv silences logs; this test needs them
+    const app = createApp({ logger });
+
+    const booked = await request(app)
+      .post(`/events/${SEED_EVENTS.calligraphy.id}/book`)
+      .set("X-User-Id", SEED_USERS.rohan.id)
+      .send({ quantity: 1 });
+    const code: string = booked.body.tickets[0].code;
+    await request(app).post("/checkins").set("X-User-Id", SEED_USERS.staff.id).send({ code });
+
+    const output = lines.join("");
+    expect(output).toContain("booking created");
+    expect(output).toContain("ticket checked in");
+    expect(output).toContain(`…${code.slice(-4)}`);
+    expect(output).not.toContain(code);
+    expect(output).not.toContain("Rohan Mehta");
   });
 });
 

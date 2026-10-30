@@ -37,3 +37,11 @@ export function normalizeTicketCode(input: string): string | null {
   }
   return cleaned;
 }
+
+/**
+ * For logs only. A full code is a bearer credential (it gets someone through the gate), so logs keep just the last
+ * 4 characters: enough to match a log line to a ticket a person reports, useless for forging one. (Gauntlet G2-1)
+ */
+export function codeHint(code: string): string {
+  return `…${code.slice(-4)}`;
+}
