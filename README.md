@@ -139,6 +139,10 @@ on a 2-left event → exactly 2 succeed; 5 parallel scans of one code → exactl
 Live setup: API on Vercel (Express, region `sin1` Singapore), web app on Vercel (static Expo web export), MySQL 8.4
 on Aiven's free tier (also Singapore, so each query is a short hop).
 
+**Every push to `main` deploys both projects automatically** (Vercel's GitHub integration; project root folders
+`api/` and `app/`). Other branches don't deploy: `git.deploymentEnabled` in each `vercel.json` allows `main` only.
+Database migrations are never part of a deploy; run step 2 by hand first when a change adds one.
+
 1. **Database (Aiven, free MySQL):** create the service; copy its Service URI and download its CA certificate
    (`ca.pem`) from the service's Overview page.
 2. **Migrate from a Linux container.** Aiven's server certificate has no `serverAuth` extended key usage, which
@@ -154,11 +158,11 @@ on Aiven's free tier (also Singapore, so each query is a short hop).
    ```
 3. **Seed** (Node verifies the certificate fine on macOS):
    `DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb' DATABASE_SSL=true DATABASE_CA_CERT="$(cat ca.pem)" npm run db:seed`
-4. **API on Vercel** (project root `api/`, `vercel deploy --prod`). `api/vercel.json` sets the Express framework,
+4. **API on Vercel** (project root `api/`, deploys on push to `main`). `api/vercel.json` sets the Express framework,
    the `sin1` region and the daily reset cron. Env: `DATABASE_URL` (no query string), `DATABASE_SSL=true`,
    `DATABASE_CA_CERT` (the PEM), `CORS_ORIGINS` (the web app URL), `CRON_SECRET` (random, 16+ chars),
    `LOG_LEVEL=info`, `RATE_LIMIT_PER_MINUTE=30`.
-5. **Web app on Vercel** (project root `app/`, `vercel deploy --prod`), env `EXPO_PUBLIC_API_URL` = the API URL.
+5. **Web app on Vercel** (project root `app/`, deploys on push to `main`), env `EXPO_PUBLIC_API_URL` = the API URL.
 6. Check `https://<api>/health` returns `{"status":"ok","db":"up"}`.
 
 ## Tests

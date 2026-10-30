@@ -1,6 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "express",
-  "regions": ["sin1"],
-  "crons": [{ "path": "/internal/reset-demo", "schedule": "30 0 * * *" }]
+  "regions": [
+    "sin1"
+  ],
+  "crons": [
+    {
+      "path": "/internal/reset-demo",
+      "schedule": "30 0 * * *"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "main": true
+    }
+  }
 }
