@@ -90,7 +90,12 @@ curl -s -X POST $API/checkins -H "X-User-Id: $AIKO" -H "Content-Type: applicatio
 
 ## How overselling is prevented
 
-Check and decrement are **one statement**, inside a transaction:
+**In short:** booking is one conditional `UPDATE … SET ticketsLeft = ticketsLeft - qty WHERE ticketsLeft >= qty`
+inside a transaction, so MySQL's row lock makes concurrent bookings queue and re-check the real stock; if no row
+changed, the booking is refused with 409. A `CHECK (ticketsLeft >= 0)` constraint backstops it. Check-in uses the
+same pattern (`WHERE checkedInAt IS NULL`), so a ticket can only be checked in once.
+
+In detail, check and decrement are **one statement**, inside a transaction:
 
 ```sql
 UPDATE Event SET ticketsLeft = ticketsLeft - :qty
@@ -149,8 +154,8 @@ on a 2-left event → exactly 2 succeed; 5 parallel scans of one code → exactl
 ## Tests
 
 ```bash
-cd api && npm test        # 78+ Jest tests, real MySQL test DB
-cd app && npm run typecheck && npm run lint
+cd api && npm test        # 86 Jest tests, real MySQL test DB
+cd app && npm test && npm run typecheck && npm run lint
 ```
 
 See `GAUNTLET.md` for the concurrency, security and load test results.
