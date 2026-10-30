@@ -1,15 +1,15 @@
 # Gauntlet: test results
 
 Run 2026-10-30 on a MacBook Air (Apple M2), Node 24.18.1, MySQL 8.4 in Docker. **Local and test databases
-only**, never a deployed URL. Findings are reported here, not fixed (fixes are a separate decision).
+only**, never a deployed URL. Findings were reported first and fixed afterwards on `fix/security-findings` once the owner chose to (see Status).
 
 | Pass | Result |
 |---|---|
-| Unit + integration (API) | **84 / 84 pass**: real HTTP (supertest) → routes → services → MySQL `ota_test`, no mocks |
+| Unit + integration (API) | **86 / 86 pass** (84 at the Gauntlet run, +2 regression tests for F-2 / F-3): real HTTP (supertest) → routes → services → MySQL `ota_test`, no mocks |
 | Unit (app) | **7 / 7 pass**: formatters (run under `TZ=America/New_York` to prove IST rendering), EN/JA key parity |
 | Concurrency | **6 / 6 pass**: no oversell, no double check-in (details below) |
 | Load (autocannon, 1,000 users per scenario) | **Invariants hold, 0 × 5xx** (details below) |
-| Break it (fresh-context security review) | 0 critical. 1 high (the documented no-auth gap), 1 medium, 2 low, 1 info. All re-verified |
+| Break it (fresh-context security review) | 0 critical. 1 high (the documented no-auth gap), 1 medium, 2 low, 1 info. All re-verified. **F-2 and F-3 fixed afterwards** |
 | Browser smoke (headless Chrome, web build) | **7 / 7 steps pass**: list, book, sold out, fan has no Scan tab, scan twice, 日本語, persistence |
 
 Re-run: `cd api && npm test` · `cd app && npm test` · load test: see bottom.
@@ -69,8 +69,8 @@ limit, cron route enabled). Every finding below was reproduced again by the main
 | ID | Severity | Finding | Evidence | Status |
 |---|---|---|---|---|
 | F-1 | High (accepted) | `X-User-Id` is spoofable, including fan → staff: anyone who knows the staff UUID can check tickets in | `POST /checkins` with the staff UUID → 200; with a fan UUID → 403 | **Known, documented.** The brief excludes login. Fix = real auth (session/JWT); role from a verified principal |
-| F-2 | Medium | Request logs include all headers, so `Authorization: Bearer <CRON_SECRET>` (and `X-User-Id`) are written to logs in plain text | Throwaway API with `CRON_SECRET=verify-secret-…`: one cron call → secret appears in 2 log lines | **Open.** Suggested fix: pino `redact` for `req.headers.authorization` (and `x-user-id`). On Vercel, anyone with log access would see the secret |
-| F-3 | Low | Rate limit bypass by sending a fake `X-Forwarded-For` (`trust proxy = 1` trusts it) | Limit 2/min: plain requests `201 201 429`; with `X-Forwarded-For: 11.11.11.11` → passes the limiter | **Local only.** Vercel overwrites `X-Forwarded-For` to prevent spoofing ([docs](https://vercel.com/docs/headers/request-headers)), so production is not affected. The per-instance limit itself is a documented gap |
+| F-2 | Medium | Request logs include all headers, so `Authorization: Bearer <CRON_SECRET>` (and `X-User-Id`) are written to logs in plain text | Throwaway API with `CRON_SECRET=verify-secret-…`: one cron call → secret appears in 2 log lines | **Fixed.** pino `redact` on `authorization`, `cookie`, `x-user-id`, `set-cookie` (`api/src/logging/logger.ts`). Re-run: secret in 0 log lines, `[redacted]` instead. Test: `logRedaction.test.ts` |
+| F-3 | Low | Rate limit bypass by sending a fake `X-Forwarded-For` (`trust proxy = 1` trusts it) | Limit 2/min: plain requests `201 201 429`; with `X-Forwarded-For: 11.11.11.11` → passes the limiter | **Fixed.** Vercel overwrites `X-Forwarded-For` ([docs](https://vercel.com/docs/headers/request-headers)), so `trust proxy` is now on only when `VERCEL` is set; elsewhere the socket address is used. Re-run: spoofed header → 429. The per-instance limit itself remains a documented gap |
 | F-4 | Low | A successful check-in returns the holder's name | `"holderName": "Aiko Sharma"` | Intended for gate staff; exposure only via F-1 |
 | F-5 | Info | Check-in answers differ for unknown (404), unused (200) and used (409) codes | Observed | Staff-only, and codes are 60-bit random, so enumeration is infeasible. No action |
 
