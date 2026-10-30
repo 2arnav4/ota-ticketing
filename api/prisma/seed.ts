@@ -31,7 +31,8 @@ export async function seedDemoData(prisma: PrismaClient): Promise<void> {
       const { id, ...fields } = ticket;
       await tx.ticket.upsert({ where: { id }, create: ticket, update: fields });
     }
-  });
+  }, // ~25 round trips; from a laptop to a distant hosted DB that outlasts Prisma's 5 s default.
+  { maxWait: 10_000, timeout: 60_000 });
 }
 
 // CLI entry (`npm run db:seed`, `prisma db seed`). Tests import seedDemoData without running this block.

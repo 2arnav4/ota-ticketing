@@ -1,7 +1,7 @@
 import { Writable } from "node:stream";
 import request from "supertest";
 import { SEED_USERS } from "../prisma/seedData";
-import { createApp } from "../src/app";
+import { createApp } from "../src/createApp";
 import { prisma } from "../src/db/prisma";
 import { createLogger } from "../src/logging/logger";
 

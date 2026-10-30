@@ -1,5 +1,5 @@
 import request from "supertest";
-import { createApp } from "../src/app";
+import { createApp } from "../src/createApp";
 import { prisma } from "../src/db/prisma";
 
 const app = createApp();

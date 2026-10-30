@@ -5,8 +5,8 @@ Express + MySQL API, Expo (React Native) app for iOS, Android and web.
 
 | | |
 |---|---|
-| Live web app | _added after deploy_ |
-| Live API | _added after deploy_ (`/health` shows DB status) |
+| Live web app | **https://ota-ticketing.vercel.app** (phone or desktop browser) |
+| Live API | **https://ota-ticketing-api.vercel.app** (`/health` shows DB status) |
 | Stack | Node 24, Express 5, Prisma 7, MySQL 8 · Expo SDK 58, Expo Router, React Query, i18next |
 
 ## Try it in 2 minutes (reviewers)
@@ -136,20 +136,30 @@ on a 2-left event → exactly 2 succeed; 5 parallel scans of one code → exactl
 
 ## Deploy (owner notes)
 
+Live setup: API on Vercel (Express, region `sin1` Singapore), web app on Vercel (static Expo web export), MySQL 8.4
+on Aiven's free tier (also Singapore, so each query is a short hop).
+
 1. **Database (Aiven, free MySQL):** create the service; copy its Service URI and download its CA certificate
    (`ca.pem`) from the service's Overview page.
-2. **Migrate + seed from your machine** (not in the Vercel build, so a bad deploy can't migrate):
+2. **Migrate from a Linux container.** Aiven's server certificate has no `serverAuth` extended key usage, which
+   macOS's TLS verifier requires, so `prisma migrate deploy` on a Mac fails with P1011 even though the chain is
+   valid. Inside Docker, OpenSSL verifies it normally (TLS stays verified; never use `sslaccept=accept_invalid_certs`):
    ```bash
    cd api
-   DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb?sslaccept=strict&sslcert=/absolute/path/ca.pem' npx prisma migrate deploy
-   DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb' DATABASE_SSL=true DATABASE_CA_CERT="$(cat /absolute/path/ca.pem)" npm run db:seed
+   docker run --rm -v "$PWD/prisma:/src/prisma:ro" -v "$PWD/prisma.config.ts:/src/prisma.config.ts:ro" \
+     -v /absolute/path/ca.pem:/ca.pem:ro \
+     -e DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb?sslaccept=strict&sslcert=/ca.pem' \
+     node:24-bookworm-slim sh -c 'mkdir /work && cp -r /src/prisma /src/prisma.config.ts /work/ && cd /work && \
+       npm init -y >/dev/null && npm i --silent prisma@7.10.1 dotenv@18.0.9 && npx prisma migrate deploy'
    ```
-3. **API on Vercel:** new project from this repo, Root Directory `api`. Env vars: `DATABASE_URL`,
-   `DATABASE_SSL=true`, `DATABASE_CA_CERT` (the PEM), `CORS_ORIGINS` (the web app URL), `CRON_SECRET`
-   (16+ random chars). `api/vercel.json` registers the daily reset cron.
-4. **Web app on Vercel:** second project, Root Directory `app`, env `EXPO_PUBLIC_API_URL` = the API URL.
-   `app/vercel.json` sets the build (`expo export --platform web`) and SPA rewrites.
-5. Check `https://<api>/health` returns `{"status":"ok","db":"up"}`.
+3. **Seed** (Node verifies the certificate fine on macOS):
+   `DATABASE_URL='mysql://USER:PASS@HOST:PORT/defaultdb' DATABASE_SSL=true DATABASE_CA_CERT="$(cat ca.pem)" npm run db:seed`
+4. **API on Vercel** (project root `api/`, `vercel deploy --prod`). `api/vercel.json` sets the Express framework,
+   the `sin1` region and the daily reset cron. Env: `DATABASE_URL` (no query string), `DATABASE_SSL=true`,
+   `DATABASE_CA_CERT` (the PEM), `CORS_ORIGINS` (the web app URL), `CRON_SECRET` (random, 16+ chars),
+   `LOG_LEVEL=info`, `RATE_LIMIT_PER_MINUTE=30`.
+5. **Web app on Vercel** (project root `app/`, `vercel deploy --prod`), env `EXPO_PUBLIC_API_URL` = the API URL.
+6. Check `https://<api>/health` returns `{"status":"ok","db":"up"}`.
 
 ## Tests
 
