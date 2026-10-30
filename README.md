@@ -9,27 +9,75 @@ Express + MySQL API, Expo (React Native) app for iOS, Android and web.
 | Live API | **https://ota-ticketing-api.vercel.app** (`/health` shows DB status) |
 | Stack | Node 24, Express 5, Prisma 7, MySQL 8 · Expo SDK 58, Expo Router, React Query, i18next |
 
-## Try it in 2 minutes (reviewers)
+## Test the live site (reviewers)
 
-There is no login (the brief excludes it). Pick a demo user from the chips at the top of the app; the app sends
-that user's ID as the `X-User-Id` header.
+Open **https://ota-ticketing.vercel.app** on a phone or a laptop. Nothing to install, no account. There is no
+login (the brief excludes it): pick a demo user from the chips at the top, and the app sends that user's ID as the
+`X-User-Id` header.
 
 | User | Role | Starts with |
 |---|---|---|
-| Aiko Sharma | Fan | 2 Day 1 tickets, 1 used ticket from a past event |
+| Aiko Sharma | Fan | 2 unused Day 1 tickets, 1 used ticket from a past event |
 | Rohan Mehta | Fan | No tickets |
-| Gate Staff | Staff | The only user who can check tickets in (Scan tab) |
+| Gate Staff | Staff | The only user who can check tickets in (the Scan tab appears only for them) |
 
-1. **Book:** as Rohan, open **Ōta TOKYO Delhi: Day 2** ("Only 2 left"), set 2, tap **Book now**. You land on
-   My Tickets with two QR codes. Back on Events, Day 2 now says **Sold out**. Try booking 3 on another event with
-   fewer left, or book Day 2 again: you get "Only N left" / "Just sold out".
-2. **Check in:** switch to **Gate Staff**, open **Scan**. Scan a QR from another device (or type a code like
-   `7K3M-9QX2-RB4D`, one of Aiko's). First time: green **Checked in** with the holder's name. Second time: amber
-   **Already checked in** with the original time.
-3. **See it as the fan:** switch back to Rohan (or Aiko): the ticket now shows **Checked in · HH:MM** and its QR fades.
-4. **日本語:** tap the language pill. All UI text and dates switch; event names stay as listed.
+### In the app (about 3 minutes)
 
-The live demo data **resets every day** (Vercel Cron, around 06:00 IST), so "Day 2: 2 left" comes back.
+1. **Browse:** 5 upcoming events with date (IST), venue, price (₹) and tickets left. "Ōta TOKYO Delhi: Day 2"
+   shows **Only 2 left**; "Anime Fans Meetup" is **Sold out**.
+2. **Book:** as **Rohan**, on Day 1 pick 1 to 4 with − / + and tap **Book now**. You land on **My Tickets**: one QR
+   per ticket, its code as `XXXX-XXXX-XXXX` and a grey **Not used** badge. Back on Events, the count went down.
+3. **No overselling:** book the last tickets of Day 2. The card turns **Sold out**; booking again says "Just sold
+   out." With two devices (say phone and laptop, even as the same user), press **Book now** on the last ticket
+   at the same moment: one gets it, the other is told it sold out.
+4. **Check in:** keep a ticket's QR open on one screen. On a phone, switch to **Gate Staff** → **Scan** → allow the
+   camera and point it at the QR (or type the code under the camera). First scan: green **Checked in** with the
+   holder's name.
+5. **Only once:** scan the same QR again → amber **Already checked in** with the time of the first scan.
+6. **Back as the fan:** that ticket now shows **Checked in · HH:MM** and its QR fades (switch tabs to refresh).
+7. **日本語:** tap the language pill. All UI text and dates switch to Japanese; event names stay as listed.
+
+### The two rules from the API (about 1 minute)
+
+Copy-paste into a terminal (bash or zsh). This changes the shared demo data: Day 2 stays sold out until the daily
+reset.
+
+```bash
+API=https://ota-ticketing-api.vercel.app
+ROHAN=4a12eeb9-cc9f-404c-9493-957d3bd4cffb
+STAFF=cfc750b1-5c92-4710-8600-71d30c438c43
+DAY1=b0772539-e91f-4237-b6d0-28a78d2f1fe4
+DAY2=717f39ba-ce42-4e30-97a6-102b009f380b
+
+# Rule 1, no overselling: 20 bookings for Day 2 fired at the same moment.
+for i in $(seq 1 20); do
+  curl -s -o /dev/null -w "%{http_code}\n" -X POST $API/events/$DAY2/book \
+    -H "X-User-Id: $ROHAN" -H "Content-Type: application/json" -d '{"quantity":1}' &
+done | sort | uniq -c
+# Expected with Day 2 at 2 left:   2 201   and   18 409   (if someone already bought them: 20 409, never more 201s than were left)
+
+# Rule 2, check in once: book one ticket, then scan its code twice.
+CODE=$(curl -s -X POST $API/events/$DAY1/book -H "X-User-Id: $ROHAN" -H "Content-Type: application/json" \
+  -d '{"quantity":1}' | grep -o '"code":"[A-Z0-9]*"' | cut -d'"' -f4)
+curl -s -X POST $API/checkins -H "X-User-Id: $STAFF" -H "Content-Type: application/json" -d "{\"code\":\"$CODE\"}"; echo
+curl -s -X POST $API/checkins -H "X-User-Id: $STAFF" -H "Content-Type: application/json" -d "{\"code\":\"$CODE\"}"; echo
+# Expected: first {"ticket":{...}}, second 409 {"error":{"code":"ALREADY_CHECKED_IN",...,"details":{"checkedInAt":"<first scan>"}}}
+```
+
+More requests (validation, 403 for fans checking in, sold-out and past events) are under [API](#api).
+
+### Good to know
+
+- **Shared data, reset daily.** Every reviewer uses the same database; it resets to the seed every day around
+  06:00 IST. If Day 2 is already sold out, book Cosplay Craft Workshop or Japanese Calligraphy Session instead.
+- **First request may be slow.** The API is serverless; after a quiet spell the first load can take a few
+  seconds. If you see "Can't connect right now", tap **Retry**. If it persists, check
+  https://ota-ticketing-api.vercel.app/health (it reports whether the database is up).
+- **Rate limit:** 30 bookings / check-ins per minute per client. The race above stays under it.
+- **Camera:** works in phone browsers because the site is HTTPS. On a laptop, type the code instead.
+- **Identity is a demo header, not security.** Anyone can act as any demo user, including Gate Staff; real login
+  would replace it (see Known gaps).
+- **Run it yourself:** everything also runs locally (next section), and `TEST_PLAN.md` has a 15-point checklist.
 
 ## Run it locally
 
