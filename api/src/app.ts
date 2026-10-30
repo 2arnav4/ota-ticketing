@@ -10,6 +10,7 @@ import { writeRateLimit } from "./middleware/rateLimit";
 import { checkinsRouter } from "./routes/checkins";
 import { eventsRouter } from "./routes/events";
 import { healthRouter } from "./routes/health";
+import { internalRouter } from "./routes/internal";
 import { meRouter } from "./routes/me";
 
 export const logger = pino({ level: env.LOG_LEVEL });
@@ -44,6 +45,7 @@ export function createApp({ writesPerMinute = env.RATE_LIMIT_PER_MINUTE }: AppOp
   app.use("/events", eventsRouter(writeLimit));
   app.use("/me", meRouter);
   app.use("/checkins", checkinsRouter(writeLimit));
+  app.use("/internal", internalRouter);
 
   app.use(notFound);
   app.use(errorHandler);
