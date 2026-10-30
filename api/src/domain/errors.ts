@@ -4,6 +4,7 @@ export type ErrorCode =
   | "MISSING_USER_ID"
   | "INVALID_USER_ID"
   | "UNKNOWN_USER"
+  | "UNAUTHORIZED"
   | "FORBIDDEN"
   | "VALIDATION_FAILED"
   | "NOT_FOUND"
