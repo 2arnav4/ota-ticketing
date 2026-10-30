@@ -1,24 +1,31 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
+import { AppError } from "../domain/errors";
 
-// Step 3 replaces this with AppError codes. The body shape is fixed now so clients never see another one.
-function errorBody(code: string, message: string) {
-  return { error: { code, message, details: {} } };
+function errorBody(error: AppError) {
+  return { error: { code: error.code, message: error.message, details: error.details } };
 }
 
-export const notFound: RequestHandler = (_req, res) => {
-  res.status(404).json(errorBody("NOT_FOUND", "Route not found"));
+export const notFound: RequestHandler = () => {
+  throw new AppError(404, "NOT_FOUND", "Route not found");
 };
 
-// body-parser marks its own failures with `type`; everything else is an unexpected 500 with no stack in the body.
+// Order matters: known AppErrors first, then body-parser's tagged failures, then everything else as an opaque 500.
+// Prisma and driver errors fall into the last branch, so their messages never reach the client.
 export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
+  if (err instanceof AppError) {
+    // Expected outcomes (409 sold out, 403, 400...), logged with their code so the reason is visible, not just the status.
+    req.log.info({ code: err.code, status: err.status, details: err.details }, "request rejected");
+    res.status(err.status).json(errorBody(err));
+    return;
+  }
   if (err?.type === "entity.too.large") {
-    res.status(413).json(errorBody("PAYLOAD_TOO_LARGE", "Request body is too large"));
+    res.status(413).json(errorBody(new AppError(413, "PAYLOAD_TOO_LARGE", "Request body is too large")));
     return;
   }
   if (err?.type === "entity.parse.failed") {
-    res.status(400).json(errorBody("INVALID_JSON", "Request body is not valid JSON"));
+    res.status(400).json(errorBody(new AppError(400, "INVALID_JSON", "Request body is not valid JSON")));
     return;
   }
   req.log.error({ err }, "unhandled error");
-  res.status(500).json(errorBody("INTERNAL", "Something went wrong"));
+  res.status(500).json(errorBody(new AppError(500, "INTERNAL", "Something went wrong")));
 };

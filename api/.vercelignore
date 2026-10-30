@@ -1,0 +1,7 @@
+# Never upload local secrets or machine-specific builds; Vercel installs and generates its own.
+.env
+.env.*
+!.env.example
+node_modules
+src/generated
+coverage

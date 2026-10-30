@@ -1,0 +1,81 @@
+{
+  "tabs": {
+    "events": "Events",
+    "tickets": "My Tickets",
+    "scan": "Scan"
+  },
+  "user": {
+    "staffSuffix": " · Staff"
+  },
+  "language": {
+    "en": "EN",
+    "ja": "日本語",
+    "switch": "Change language"
+  },
+  "events": {
+    "soldOut": "Sold out",
+    "onlyLeft": "Only {{n}} left",
+    "left": "{{n}} left",
+    "ist": "IST",
+    "total": "Total",
+    "bookNow": "Book now",
+    "fewer": "Fewer tickets",
+    "more": "More tickets",
+    "ticketsCount": "{{count}} tickets"
+  },
+  "booking": {
+    "notEnough": "Only {{count}} left. Lower the quantity and try again.",
+    "soldOut": "Just sold out.",
+    "started": "This event has already started.",
+    "rateLimited": "Too many attempts. Wait a minute and try again.",
+    "failed": "Booking failed. Try again."
+  },
+  "tickets": {
+    "booked_one": "Booked 1 ticket",
+    "booked_other": "Booked {{count}} tickets",
+    "checkedIn": "Checked in · {{time}}",
+    "notUsed": "Not used",
+    "usedOn": "Used on {{when}}",
+    "qrLabel": "QR code for ticket {{code}}",
+    "emptyTitle": "No tickets yet",
+    "emptyMessage": "Book an event and your QR tickets show up here.",
+    "browse": "Browse events"
+  },
+  "scan": {
+    "staffOnlyNotice": "Scanning is for gate staff. Switch to Gate Staff above.",
+    "allowPrompt": "Allow the camera to scan ticket QR codes.",
+    "cameraBlocked": "Camera access is off. Enable it in Settings, or type the code below.",
+    "allowButton": "Allow camera",
+    "checking": "Checking…",
+    "typeCode": "Or type the code",
+    "codeLabel": "Ticket code",
+    "checkIn": "Check in",
+    "next": "Scan next",
+    "result": {
+      "checkedIn": "Checked in",
+      "already": "Already checked in",
+      "alreadyAt": "First scanned {{when}} IST",
+      "doNotAdmit": "Do not admit again.",
+      "unknown": "Unknown ticket",
+      "unknownLine": "No ticket has this code.",
+      "invalid": "Not a ticket code",
+      "invalidLine": "This QR isn't an Ōta ticket.",
+      "staffOnly": "Staff only",
+      "staffOnlyLine": "Switch to Gate Staff to check tickets in.",
+      "offline": "No connection",
+      "failed": "Check-in failed",
+      "tryAgain": "Try again."
+    }
+  },
+  "errors": {
+    "title": "Couldn't load this",
+    "network": "Can't connect right now. Check your internet connection and try again.",
+    "generic": "Something went wrong.",
+    "retry": "Retry",
+    "loading": "Loading",
+    "server": "Something went wrong on our side. Please try again in a moment."
+  },
+  "banner": {
+    "dismiss": "Dismiss"
+  }
+}

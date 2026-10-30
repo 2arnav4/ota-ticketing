@@ -1,5 +1,5 @@
 import request from "supertest";
-import { createApp } from "../src/app";
+import { createApp } from "../src/createApp";
 import { prisma } from "../src/db/prisma";
 import * as healthService from "../src/services/healthService";
 
