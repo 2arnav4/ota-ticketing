@@ -19,3 +19,5 @@ export type Ticket = {
   createdAt: string;
   event: { id: string; name: string; venue: string; city: string; startsAt: string };
 };
+
+export type CheckedInTicket = Ticket & { holderName: string };

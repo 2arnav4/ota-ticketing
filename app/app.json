@@ -32,6 +32,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Ōta Tickets to use the camera to scan ticket QR codes at the gate."
+        }
       ]
     ],
     "experiments": {
