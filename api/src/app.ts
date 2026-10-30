@@ -7,6 +7,7 @@ import { env } from "./config/env";
 import { corsMiddleware } from "./middleware/cors";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import { writeRateLimit } from "./middleware/rateLimit";
+import { checkinsRouter } from "./routes/checkins";
 import { eventsRouter } from "./routes/events";
 import { healthRouter } from "./routes/health";
 import { meRouter } from "./routes/me";
@@ -42,6 +43,7 @@ export function createApp({ writesPerMinute = env.RATE_LIMIT_PER_MINUTE }: AppOp
   app.use("/health", healthRouter);
   app.use("/events", eventsRouter(writeLimit));
   app.use("/me", meRouter);
+  app.use("/checkins", checkinsRouter(writeLimit));
 
   app.use(notFound);
   app.use(errorHandler);
