@@ -89,7 +89,7 @@ More requests (validation, 403 for fans checking in, sold-out and past events) a
 - **Camera:** works in phone browsers because the site is HTTPS. On a laptop, type the code instead.
 - **Identity is a demo header, not security.** Anyone can act as any demo user, including Gate Staff; real login
   would replace it (see Known gaps).
-- **Run it yourself:** everything also runs locally (next section), and `TEST_PLAN.md` has a 15-point checklist.
+- **Run it yourself:** everything also runs locally (next section).
 
 ## Run it locally
 
@@ -234,11 +234,10 @@ Database migrations are never part of a deploy; run step 2 by hand first when a 
 ## Tests
 
 ```bash
-cd api && npm test        # 86 Jest tests, real MySQL test DB
+cd api && npm test        # 97 Jest tests, real MySQL test DB
 cd app && npm test && npm run typecheck && npm run lint
 cd api && npm run race    # 20 simultaneous bookings on the 2-left event: exactly 2 must win (local only)
 cd api && npm run dev:logs   # API with readable logs: one line per booking, check-in and rejection
 ```
 
-- `TEST_PLAN.md`: a 15-point feature checklist (live site or local) and a one-minute race-condition test.
 - `GAUNTLET.md`: concurrency, load and security test results.
