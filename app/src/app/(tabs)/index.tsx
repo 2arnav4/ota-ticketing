@@ -6,11 +6,13 @@ import { ErrorState } from "@/components/ErrorState";
 import { EventCard } from "@/components/EventCard";
 import { EventCardSkeleton } from "@/components/EventCardSkeleton";
 import { useEvents } from "@/hooks/useEvents";
+import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import { colors, layout, space } from "@/theme/tokens";
 
 export default function EventsScreen() {
   const { t, i18n } = useTranslation();
   const { data: events, isPending, isError, error, refetch, isRefetching } = useEvents();
+  useRefreshOnFocus(refetch);
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>

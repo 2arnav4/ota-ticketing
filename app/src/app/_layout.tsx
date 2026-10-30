@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ApiError } from "@/api/client";
+import { useAppStateFocus } from "@/hooks/useRefreshOnFocus";
 import { SessionProvider } from "@/state/session";
 
 // 4xx answers are final (bad input, unknown user, sold out); retrying them only repeats the error. Retry network/5xx twice.
@@ -20,6 +21,8 @@ export default function RootLayout() {
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: shouldRetry, staleTime: 15_000 } } }),
   );
+
+  useAppStateFocus();
 
   useEffect(() => {
     void restoreSavedLanguage();
