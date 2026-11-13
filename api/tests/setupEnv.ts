@@ -13,5 +13,7 @@ process.env.DATABASE_URL = testUrl;
 process.env.NODE_ENV = "test";
 process.env.LOG_LEVEL = "silent";
 process.env.CORS_ORIGINS = "http://localhost:8081";
-// High so parallel-booking tests measure the oversell guard, not the limiter. The limiter has its own test.
-process.env.RATE_LIMIT_PER_MINUTE = "100000";
+// High so parallel-booking tests measure the oversell guard, not the limiters. The limiters have their own tests.
+process.env.RATE_LIMIT_IP_PER_MINUTE = "100000";
+process.env.RATE_LIMIT_BOOKINGS_PER_USER_PER_MINUTE = "100000";
+process.env.RATE_LIMIT_CHECKINS_PER_USER_PER_MINUTE = "100000";

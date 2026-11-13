@@ -8,7 +8,8 @@ import { formatDateAndTime, formatTicketCode } from "@/utils/format";
 
 type Props = { ticket?: CheckedInTicket; error?: unknown; onNext: () => void };
 
-type ResultView = { tone: "success" | "warning" | "danger"; title: string; lines: string[] };
+// "neutral" = no verdict on the ticket at all (it was never checked), so it must not look like any admit/refuse tone.
+type ResultView = { tone: "success" | "warning" | "danger" | "neutral"; title: string; lines: string[] };
 
 function describe({ ticket, error }: Pick<Props, "ticket" | "error">, t: TFunction, language: string): ResultView {
   if (ticket) {
@@ -30,6 +31,8 @@ function describe({ ticket, error }: Pick<Props, "ticket" | "error">, t: TFuncti
     if (result.code === "TICKET_NOT_FOUND") return { tone: "danger", title: t("scan.result.unknown"), lines: [t("scan.result.unknownLine")] };
     if (result.code === "VALIDATION_FAILED") return { tone: "danger", title: t("scan.result.invalid"), lines: [t("scan.result.invalidLine")] };
     if (result.code === "FORBIDDEN") return { tone: "danger", title: t("scan.result.staffOnly"), lines: [t("scan.result.staffOnlyLine")] };
+    // 429: the server never looked at this ticket, so staff must re-scan it, not admit or refuse it.
+    if (result.code === "RATE_LIMITED") return { tone: "neutral", title: t("scan.result.slowDown"), lines: [t("scan.result.slowDownLine")] };
   }
   return { tone: "danger", title: t("scan.result.failed"), lines: [t("scan.result.tryAgain")] };
 }
@@ -38,6 +41,7 @@ const TONES = {
   success: { fg: colors.success, bg: colors.successTint },
   warning: { fg: colors.warning, bg: colors.warningTint },
   danger: { fg: colors.danger, bg: colors.dangerTint },
+  neutral: { fg: colors.ink, bg: colors.neutralFill },
 } as const;
 
 export function ScanResultSheet({ ticket, error, onNext }: Props) {
