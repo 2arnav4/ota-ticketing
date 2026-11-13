@@ -60,6 +60,8 @@
       "invalidLine": "このQRはŌtaのチケットではありません。",
       "staffOnly": "スタッフ専用",
       "staffOnlyLine": "入場処理にはGate Staffに切り替えてください。",
+      "slowDown": "スキャンが多すぎます",
+      "slowDownLine": "このチケットは確認されていません。少し待ってから、もう一度スキャンしてください。",
       "offline": "接続できません",
       "failed": "入場処理に失敗しました",
       "tryAgain": "もう一度お試しください。"

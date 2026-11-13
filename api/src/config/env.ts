@@ -23,8 +23,16 @@ const EnvSchema = z.object({
   CRON_SECRET: optional(z.string().min(16)),
   PORT: z.coerce.number().int().positive().default(4000),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
-  // Per-IP writes (book, check-in) per minute, per instance. Tests raise it so parallel bursts aren't throttled.
-  RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(30),
+  // Write limits per minute, per instance. Tests raise all three so parallel bursts aren't throttled.
+  // Per IP, per route (bookings and check-ins each get their own): a loose flood guard, since a venue's Wi-Fi can
+  // be one public IP.
+  RATE_LIMIT_IP_PER_MINUTE: z.coerce.number().int().positive().default(600),
+  // Booking attempts per fan (on one IP). 400s and idempotent replays are refunded; 409s count, since each locks the
+  // event row. A real fan tries a few times at most; 30 leaves room for `npm run race` (10 per user) a few times a minute.
+  RATE_LIMIT_BOOKINGS_PER_USER_PER_MINUTE: z.coerce.number().int().positive().default(30),
+  // Check-ins per staff user (on one IP), failures included: one scanner does a scan every 2-3 s (20-30 a minute),
+  // and the demo has one shared staff account, so 300 covers about 10 gates on one network.
+  RATE_LIMIT_CHECKINS_PER_USER_PER_MINUTE: z.coerce.number().int().positive().default(300),
   CORS_ORIGINS: z
     .string()
     .default("")

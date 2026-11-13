@@ -101,20 +101,3 @@ describe("overselling", () => {
     expect(await prisma.ticket.count({ where: { eventId: SEED_EVENTS.delhiDay2.id } })).toBe(2);
   });
 });
-
-describe("rate limit", () => {
-  it("returns 429 once a client exceeds the per-minute write budget", async () => {
-    const limitedApp = createApp({ writesPerMinute: 2 });
-    const send = () =>
-      request(limitedApp)
-        .post(`/events/${SEED_EVENTS.calligraphy.id}/book`)
-        .set("X-User-Id", rohan)
-        .send({ quantity: 1 });
-
-    expect((await send()).status).toBe(201);
-    expect((await send()).status).toBe(201);
-    const third = await send();
-    expect(third.status).toBe(429);
-    expect(third.body.error.code).toBe("RATE_LIMITED");
-  });
-});

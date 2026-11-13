@@ -3,10 +3,11 @@ import { postBooking } from "../controllers/bookingController";
 import { getEvents } from "../controllers/eventController";
 import { userContext } from "../middleware/userContext";
 
-export function eventsRouter(writeLimit: RequestHandler): Router {
+export function eventsRouter(ipLimit: RequestHandler, bookingLimit: RequestHandler): Router {
   const router = Router();
   router.get("/", userContext, getEvents);
-  // Limit before identity: a flood of bad requests shouldn't cost a DB lookup each.
-  router.post("/:id/book", writeLimit, userContext, postBooking);
+  // IP limit before identity: a flood of bad requests shouldn't cost a DB lookup each.
+  // Booking limit after identity (it is keyed by user), so fans sharing one IP don't use up each other's budget.
+  router.post("/:id/book", ipLimit, userContext, bookingLimit, postBooking);
   return router;
 }
