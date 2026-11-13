@@ -7,7 +7,7 @@ import { env } from "./config/env";
 import { corsMiddleware } from "./middleware/cors";
 import { logger as defaultLogger } from "./logging/logger";
 import { errorHandler, notFound } from "./middleware/errorHandler";
-import { writeRateLimit } from "./middleware/rateLimit";
+import { bookingLimit, checkinLimit, ipWriteLimit } from "./middleware/rateLimit";
 import { checkinsRouter } from "./routes/checkins";
 import { eventsRouter } from "./routes/events";
 import { healthRouter } from "./routes/health";
@@ -16,12 +16,16 @@ import { meRouter } from "./routes/me";
 
 export { defaultLogger as logger };
 
-type AppOptions = { writesPerMinute?: number; logger?: Logger };
+type RateLimits = { ipPerMinute: number; bookingsPerUserPerMinute: number; checkinsPerUserPerMinute: number };
+type AppOptions = { rateLimits?: Partial<RateLimits>; logger?: Logger };
 
-export function createApp({
-  writesPerMinute = env.RATE_LIMIT_PER_MINUTE,
-  logger = defaultLogger,
-}: AppOptions = {}): express.Express {
+export function createApp({ rateLimits = {}, logger = defaultLogger }: AppOptions = {}): express.Express {
+  const limits: RateLimits = {
+    ipPerMinute: env.RATE_LIMIT_IP_PER_MINUTE,
+    bookingsPerUserPerMinute: env.RATE_LIMIT_BOOKINGS_PER_USER_PER_MINUTE,
+    checkinsPerUserPerMinute: env.RATE_LIMIT_CHECKINS_PER_USER_PER_MINUTE,
+    ...rateLimits,
+  };
   const app = express();
 
   // On Vercel exactly one proxy sits in front and it overwrites X-Forwarded-For, so trusting one hop gives the
@@ -48,13 +52,15 @@ export function createApp({
   app.use(corsMiddleware);
   app.use(express.json({ limit: "10kb" }));
 
-  // One limiter instance shared by every write route, so book + check-in count against the same budget.
-  const writeLimit = writeRateLimit(writesPerMinute);
+  // Each write route gets its own IP flood guard and its own budget keyed by user + IP, so a busy gate scanner and
+  // booking fans on the same Wi-Fi never use up each other's allowance (details in rateLimit.ts).
+  const bookingGuards = [ipWriteLimit(limits.ipPerMinute, "ip-bookings"), bookingLimit(limits.bookingsPerUserPerMinute)] as const;
+  const checkinGuards = [ipWriteLimit(limits.ipPerMinute, "ip-checkins"), checkinLimit(limits.checkinsPerUserPerMinute)] as const;
 
   app.use("/health", healthRouter);
-  app.use("/events", eventsRouter(writeLimit));
+  app.use("/events", eventsRouter(...bookingGuards));
   app.use("/me", meRouter);
-  app.use("/checkins", checkinsRouter(writeLimit));
+  app.use("/checkins", checkinsRouter(...checkinGuards));
   app.use("/internal", internalRouter);
 
   app.use(notFound);

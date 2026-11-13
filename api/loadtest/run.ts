@@ -2,10 +2,10 @@
  * Gauntlet load test. LOCAL ONLY: refuses any target that isn't localhost.
  * Simulates 1,000 concurrent users with autocannon, then checks the database-level invariants through the API.
  *
- *   PORT=4001 RATE_LIMIT_PER_MINUTE=1000000 LOG_LEVEL=warn DATABASE_URL=.../ota_load npx tsx src/index.ts
+ *   PORT=4001 RATE_LIMIT_IP_PER_MINUTE=1000000 RATE_LIMIT_BOOKINGS_PER_USER_PER_MINUTE=1000000 RATE_LIMIT_CHECKINS_PER_USER_PER_MINUTE=1000000 LOG_LEVEL=warn DATABASE_URL=.../ota_load npx tsx src/index.ts
  *   LOAD_TARGET=http://localhost:4001 npx tsx loadtest/run.ts
  *
- * The target must run with a high RATE_LIMIT_PER_MINUTE, or the limiter (not the app) is what gets measured.
+ * The target must run with high RATE_LIMIT_* values, or the limiter (not the app) is what gets measured.
  */
 import autocannon from "autocannon";
 import { SEED_EVENTS, SEED_USERS } from "../prisma/seedData";

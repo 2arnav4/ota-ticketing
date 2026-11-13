@@ -85,7 +85,9 @@ More requests (validation, 403 for fans checking in, sold-out and past events) a
 - **First request may be slow.** The API is serverless; after a quiet spell the first load can take a few
   seconds. If you see "Can't connect right now", tap **Retry**. If it persists, check
   https://ota-ticketing-api.vercel.app/health (it reports whether the database is up).
-- **Rate limit:** 30 bookings / check-ins per minute per client. The race above stays under it.
+- **Rate limit:** per minute, 30 booking attempts per fan and 300 check-in attempts per staff user (each keyed by
+  user + IP), plus a loose 600 per IP as a flood guard; bookings and check-ins each have their own budgets. Invalid
+  input and idempotent replays don't count against a fan. The race above stays under it.
 - **Camera:** works in phone browsers because the site is HTTPS. On a laptop, type the code instead.
 - **Identity is a demo header, not security.** Anyone can act as any demo user, including Gate Staff; real login
   would replace it.

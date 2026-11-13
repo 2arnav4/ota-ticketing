@@ -69,7 +69,7 @@ describe("booking and check-in logs", () => {
 // Gauntlet F-3: outside Vercel, a client-supplied X-Forwarded-For must not choose the rate-limit bucket.
 describe("rate limit keying", () => {
   it("ignores a spoofed X-Forwarded-For when not behind Vercel", async () => {
-    const app = createApp({ writesPerMinute: 2 });
+    const app = createApp({ rateLimits: { ipPerMinute: 2 } });
     const book = (forwardedFor?: string) => {
       const req = request(app)
         .post("/events/717f39ba-ce42-4e30-97a6-102b009f380b/book")
