@@ -60,6 +60,8 @@
       "invalidLine": "This QR isn't an Ōta ticket.",
       "staffOnly": "Staff only",
       "staffOnlyLine": "Switch to Gate Staff to check tickets in.",
+      "slowDown": "Too many scans",
+      "slowDownLine": "This ticket wasn't checked. Wait a moment, then scan it again.",
       "offline": "No connection",
       "failed": "Check-in failed",
       "tryAgain": "Try again."
